@@ -2,6 +2,31 @@
 
 @import 'tw-animate-css';
 
+/* Whyte Inktrap (titles) – bundled from resources/fonts/whyte/ */
+@font-face {
+    font-family: 'Whyte';
+    src: url('../fonts/whyte/ABCWhyteInktrap-Book-Trial-1.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Whyte';
+    src: url('../fonts/whyte/ABCWhyteInktrap-Medium-Trial-1.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Whyte';
+    src: url('../fonts/whyte/ABCWhyteInktrap-Bold-Trial-1.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -9,9 +34,15 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Outfit', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+
+    --font-title:
+        'Whyte', ui-sans-serif, system-ui, sans-serif;
+
+    --font-quote:
+        'Cormorant Garamond', ui-serif, Georgia, serif;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -132,12 +163,47 @@
     --sidebar-ring: oklch(0.439 0 0);
 }
 
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+/* CodePen Valgo text morph: https://codepen.io/Valgo/pen/PowZaNY */
+.morph-container {
+    position: relative;
+    display: inline-block;
+    filter: url(#threshold) blur(0.5px);
+}
+
+.morph-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    text-align: left;
+    user-select: none;
+}
+
 @layer base {
     * {
         @apply border-border;
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-light;
+    }
+
+    strong {
+        font-weight: 500;
     }
 }

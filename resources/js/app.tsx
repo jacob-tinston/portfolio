@@ -1,19 +1,35 @@
+import { PageTransition } from '@/components/page-transition';
+import { SiteLayout } from '@/components/site-layout';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { StrictMode } from 'react';
+import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Jacob Tinston';
+
+const SITE_PAGES = ['home', 'projects', 'now'];
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => (title ? `${title}` : appName),
     resolve: (name) =>
         resolvePageComponent(
             `./pages/${name}.tsx`,
             import.meta.glob('./pages/**/*.tsx'),
-        ),
+        ).then((module) => {
+            const Page = (module as { default: React.ComponentType<object> }).default;
+            if (SITE_PAGES.includes(name)) {
+                return (props: object) => (
+                    <SiteLayout>
+                        <PageTransition variant="slideUp" duration={0.45}>
+                            <Page {...props} />
+                        </PageTransition>
+                    </SiteLayout>
+                );
+            }
+            return Page;
+        }),
     setup({ el, App, props }) {
         const root = createRoot(el);
 
