@@ -1,3 +1,4 @@
+import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { Head } from '@inertiajs/react';
 import gsap from 'gsap';
@@ -18,12 +19,27 @@ export default function Now() {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from('.now-card', {
-                y: 32,
+            gsap.from('.page-title', {
+                y: 24,
                 opacity: 0,
-                stagger: 0.08,
                 duration: 0.55,
-                delay: 0.15,
+                delay: 0.1,
+                ease: 'power2.out',
+            });
+            gsap.from('.now-card', {
+                y: 28,
+                opacity: 0,
+                scale: 0.98,
+                stagger: 0.08,
+                duration: 0.7,
+                delay: 0.2,
+                ease: 'power2.out',
+            });
+            gsap.from('.now-card .word', {
+                yPercent: 120,
+                stagger: 0.04,
+                duration: 0.6,
+                delay: 0.5,
                 ease: 'power2.out',
             });
         }, containerRef);
@@ -34,9 +50,9 @@ export default function Now() {
     return (
         <>
             <Head title="Now" />
-            <div ref={containerRef} className="min-h-screen pt-36 pb-24">
+            <div ref={containerRef} className="pt-36 pb-24">
                 <div className="mx-auto max-w-[700px] px-6">
-                    <h1 className="page-title font-title mb-16 text-center text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
+                    <h1 className="page-title font-title mb-16 text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
                         <MorphWordIn>Now</MorphWordIn>
                     </h1>
                     <div className="grid gap-6 md:grid-cols-2">
@@ -47,7 +63,7 @@ export default function Now() {
                             >
                                 <h2 className="mb-2 text-lg font-semibold">{item.title}</h2>
                                 <p className="text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50">
-                                    {item.description}
+                                    <MaskedWords>{item.description}</MaskedWords>
                                 </p>
                             </div>
                         ))}

@@ -9,14 +9,19 @@ import { initializeTheme } from '@/hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Jacob Tinston';
 
-const SITE_PAGES = ['home', 'projects', 'now'];
+const SITE_PAGES = ['home', 'projects', 'now', 'contact'];
+
+const pageModules = {
+    ...import.meta.glob('./pages/*.tsx'),
+    ...import.meta.glob('./pages/settings/**/*.tsx'),
+};
 
 createInertiaApp({
     title: (title) => (title ? `${title}` : appName),
     resolve: (name) =>
         resolvePageComponent(
             `./pages/${name}.tsx`,
-            import.meta.glob('./pages/**/*.tsx'),
+            pageModules,
         ).then((module) => {
             const Page = (module as { default: React.ComponentType<object> }).default;
             if (SITE_PAGES.includes(name)) {

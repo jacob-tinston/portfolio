@@ -92,6 +92,16 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+::selection {
+    background: #1b1b18;
+    color: #fff;
+}
+
+.dark ::selection {
+    background: #EDEDEC;
+    color: #0a0a0a;
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

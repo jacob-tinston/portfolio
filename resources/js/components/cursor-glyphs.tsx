@@ -19,7 +19,7 @@ const CONFIG = {
 // Glyph-like mix: original ASCII + symbols that feel like inscriptions
 const CHARS = '0123456789/\\|+-=<>{}[]()#@&%*~^_.,:;!?$◉◎◆◇†‡§¶·▪▫●○■□'.split('');
 
-function getColor(progress: number): string {
+function getColor(progress: number, isDark: boolean): string {
     let v: number;
     if (progress < 0.2) {
         v = 26 + (progress / 0.2) * 42;
@@ -31,6 +31,9 @@ function getColor(progress: number): string {
         v = 187 + ((progress - 0.8) / 0.2) * 34;
     }
     v = Math.round(v);
+    if (isDark) {
+        v = 255 - v;
+    }
     return `rgb(${v},${v},${v})`;
 }
 
@@ -73,6 +76,7 @@ export default function CursorGlyphs() {
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
+        const context = ctx;
 
         const particles = particlesRef.current;
         const occupied = occupiedRef.current;
@@ -81,7 +85,7 @@ export default function CursorGlyphs() {
             const dpr = window.devicePixelRatio || 1;
             canvas.width = window.innerWidth * dpr;
             canvas.height = window.innerHeight * dpr;
-            ctx.scale(dpr, dpr);
+            context.scale(dpr, dpr);
         }
 
         resize();
@@ -120,11 +124,11 @@ export default function CursorGlyphs() {
         function animate() {
             const w = window.innerWidth;
             const h = window.innerHeight;
-            ctx.clearRect(0, 0, w, h);
+            context.clearRect(0, 0, w, h);
 
-            ctx.font = `${CONFIG.fontSize}px ${CONFIG.font}`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            context.font = `${CONFIG.fontSize}px ${CONFIG.font}`;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
 
             const mouseX = mouseRef.current.x;
             const mouseY = mouseRef.current.y;
@@ -157,12 +161,13 @@ export default function CursorGlyphs() {
                 const alpha =
                     (1 - progress * progress) * CONFIG.maxOpacity * distFactor;
 
-                ctx.fillStyle = getColor(progress);
-                ctx.globalAlpha = alpha;
-                ctx.fillText(p.char, p.x, p.y);
+                const isDark = document.documentElement.classList.contains('dark');
+                context.fillStyle = getColor(progress, isDark);
+                context.globalAlpha = alpha;
+                context.fillText(p.char, p.x, p.y);
             }
 
-            ctx.globalAlpha = 1;
+            context.globalAlpha = 1;
 
             if (particles.length > 0) {
                 rafRef.current = requestAnimationFrame(animate);

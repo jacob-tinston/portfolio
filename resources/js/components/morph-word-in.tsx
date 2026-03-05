@@ -92,7 +92,9 @@ export function MorphWordIn({
             ease: 'power2.out',
             onUpdate: () => setMorph(text1, text2, '', children, obj.f),
         });
-        return () => tween.kill();
+        return () => {
+            tween.kill();
+        };
     }, [children, duration, delaySec, visible]);
 
     return (

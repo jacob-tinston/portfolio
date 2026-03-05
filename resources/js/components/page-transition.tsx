@@ -53,7 +53,9 @@ export function PageTransition({
                 },
             },
         );
-        return () => tween.kill();
+        return () => {
+            tween.kill();
+        };
     }, [duration, variant]);
 
     return (

@@ -1,3 +1,5 @@
+import { ContactSection } from '@/components/contact-section';
+import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { useActiveNav } from '@/contexts/active-nav-context';
 import { Head, Link } from '@inertiajs/react';
@@ -15,40 +17,6 @@ const projects = [
     { title: 'Project Three', description: 'Something creative and experimental pushing boundaries.', tags: ['GSAP', 'Canvas'] },
     { title: 'Project Four', description: 'A practical tool built to solve real-world problems.', tags: ['Node.js', 'API'] },
 ];
-
-const CONTACT_EMAIL = 'hello@example.com';
-
-const socialLinks = [
-    { label: 'X', href: 'https://x.com', ariaLabel: 'X (Twitter)' },
-    { label: 'LinkedIn', href: 'https://linkedin.com', ariaLabel: 'LinkedIn' },
-    { label: 'GitHub', href: 'https://github.com', ariaLabel: 'GitHub' },
-];
-
-function MaskedWords({
-    children,
-    className,
-    boldWords = [],
-}: {
-    children: string;
-    className?: string;
-    boldWords?: string[];
-}) {
-    const words = children.split(' ');
-    const isBold = (w: string) =>
-        boldWords.some((b) => w.replace(/[.,—:;]/g, '').toLowerCase() === b.replace(/[.,—:;]/g, '').toLowerCase());
-    return (
-        <span className={className} aria-label={children}>
-            {words.map((word, i) => (
-                <span key={i} className="inline-flex overflow-hidden" aria-hidden="true">
-                    <span className="word inline-block">
-                        {isBold(word) ? <strong>{word}</strong> : word}
-                        {i < words.length - 1 ? '\u00A0' : ''}
-                    </span>
-                </span>
-            ))}
-        </span>
-    );
-}
 
 function SplitChars({ children, className }: { children: string; className?: string }) {
     return (
@@ -189,14 +157,6 @@ function MorphWord() {
 
 export default function Home() {
     const { setActiveNav } = useActiveNav();
-    const [newsletterEmail, setNewsletterEmail] = useState('');
-    const [copied, setCopied] = useState(false);
-
-    const copyEmail = () => {
-        void navigator.clipboard.writeText(CONTACT_EMAIL);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -315,19 +275,37 @@ export default function Home() {
 
             // Section titles use MorphWordIn component (same morph as hero MorphWord)
 
-            // ── Contact: newsletter + socials entrance ──
-            gsap.from('#contact .contact-newsletter', {
+            // ── Contact: intro, newsletter, socials + word reveal ──
+            gsap.from('#contact .contact-intro', {
                 y: 24,
                 opacity: 0,
-                duration: 0.6,
+                duration: 0.55,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '#contact', start: 'top 85%', once: true },
+            });
+            gsap.from('#contact .contact-newsletter', {
+                y: 28,
+                opacity: 0,
+                scale: 0.98,
+                duration: 0.7,
+                delay: 0.08,
                 ease: 'power2.out',
                 scrollTrigger: { trigger: '#contact', start: 'top 85%', once: true },
             });
             gsap.from('#contact .contact-socials', {
-                y: 24,
+                y: 28,
                 opacity: 0,
+                scale: 0.98,
+                duration: 0.7,
+                delay: 0.18,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '#contact', start: 'top 85%', once: true },
+            });
+            gsap.from('#contact .word', {
+                yPercent: 120,
+                stagger: 0.04,
                 duration: 0.6,
-                delay: 0.15,
+                delay: 0.25,
                 ease: 'power2.out',
                 scrollTrigger: { trigger: '#contact', start: 'top 85%', once: true },
             });
@@ -341,7 +319,7 @@ export default function Home() {
             <Head title="Jacob Tinston | Software & AI Engineer" />
             <div ref={containerRef}>
                 {/* ── Hero (above About) ── */}
-                <section className="px-6 pt-36 pb-4">
+                <section className="px-6 pt-20 pb-4 sm:pt-36">
                     <div className="mx-auto max-w-[700px]">
                         <div className="hero-card relative z-10 flex flex-col gap-8 overflow-hidden rounded-2xl border border-white/30 bg-white/60 p-8 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 sm:flex-row sm:items-center sm:gap-10 sm:p-10">
                             <div className="hero-card-content flex flex-1 flex-col justify-center">
@@ -376,11 +354,11 @@ export default function Home() {
                 {/* ── About ── */}
                 <section id="about" className="pt-16 pb-24">
                     <div className="about-section mx-auto max-w-[700px] px-6 text-center">
-                        <p className="about-block font-light leading-[1.5] text-[#1b1b18] dark:text-[#EDEDEC] text-[clamp(24px,3.5vw,36px)]">
+                        <p className="about-block font-light leading-[1.5] text-[#1b1b18] dark:text-[#EDEDEC] text-[clamp(20px,3vw,32px)]">
                             <MaskedWords
-                                boldWords={['details', 'micro-interactions', 'Every', 'pixel', 'is', 'intentional.']}
+                                boldWords={['tsuyoku', 'naritai', 'self', 'taught', 'engineer', 'experience', 'show', 'up', 'work', 'hard', 'be', 'better']}
                             >
-                                Design engineer building at the intersection of craft and code. I care about the details that make interfaces feel alive — micro-interactions, typography, motion. Building tools at the intersection of design and engineering. Every pixel is intentional.
+                                Tsuyoku naritai. Loosely translated, means "I want to become stronger". It's the standard I live by. I'm a self taught engineer focused on building thoughtful, end-to-end products. Everything I know, i've learned through experience. Beyond the screen, I enjoy boxing, climbing things, and getting outdoors. Same principle throughout - show up, work hard, be better.
                             </MaskedWords>
                         </p>
                     </div>
@@ -394,7 +372,7 @@ export default function Home() {
                                 <MorphWordIn>Projects</MorphWordIn>
                             </h2>
                             <p className="text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50 md:text-base">
-                                A selection of things I&apos;ve built, shipped, and obsessed over.
+                                <MaskedWords>A selection of things I&apos;ve built, shipped, and obsessed over.</MaskedWords>
                             </p>
                         </div>
 
@@ -407,7 +385,7 @@ export default function Home() {
                                     <div className="mb-4 h-36 rounded-xl bg-[#f5f5f4] dark:bg-[#1e1e1d] md:mb-6 md:h-48 lg:h-56" />
                                     <h3 className="mb-2 text-lg font-semibold md:text-xl">{project.title}</h3>
                                     <p className="text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50 md:text-base">
-                                        {project.description}
+                                        <MaskedWords>{project.description}</MaskedWords>
                                     </p>
                                 </div>
                                 <div className="flex gap-2">
@@ -428,7 +406,7 @@ export default function Home() {
                                 See more
                             </p>
                             <p className="mb-6 text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50">
-                                View the full projects archive and case studies.
+                                <MaskedWords>View the full projects archive and case studies.</MaskedWords>
                             </p>
                             <Link
                                 href="/projects"
@@ -444,75 +422,7 @@ export default function Home() {
                 </section>
 
                 {/* ── Contact ── */}
-                <section id="contact" className="py-32">
-                    <div className="mx-auto max-w-[700px] px-6">
-                        <h2 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
-                            <MorphWordIn>Contact</MorphWordIn>
-                        </h2>
-                        <p className="mb-12 text-lg leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
-                            I&apos;m not looking for work or new projects right now — but say hi, or get occasional updates below.
-                        </p>
-
-                        <div className="contact-newsletter relative z-10 mb-16 rounded-2xl border border-white/30 bg-white/60 p-6 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 md:p-8">
-                            <h3 className="mb-2 text-sm font-medium uppercase tracking-wider text-[#1b1b18]/60 dark:text-[#EDEDEC]/60">
-                                Newsletter
-                            </h3>
-                            <p className="mb-4 text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
-                                Infrequent updates, no spam.
-                            </p>
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                <input
-                                    type="email"
-                                    placeholder="you@example.com"
-                                    value={newsletterEmail}
-                                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                                    className="min-w-0 flex-1 rounded-lg border border-[#e3e3e0] bg-[#fafaf9] px-4 py-2.5 text-[#1b1b18] placeholder:text-[#1b1b18]/40 focus:border-[#1b1b18]/30 focus:outline-none focus:ring-2 focus:ring-[#1b1b18]/10 dark:border-[#2a2a28] dark:bg-[#0a0a0a] dark:text-[#EDEDEC] dark:placeholder:text-[#EDEDEC]/40 dark:focus:border-[#EDEDEC]/30 dark:focus:ring-[#EDEDEC]/10"
-                                    aria-label="Email for newsletter"
-                                />
-                                <button
-                                    type="button"
-                                    className="shrink-0 rounded-lg border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
-                                >
-                                    Subscribe
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="contact-socials flex flex-wrap items-center justify-center gap-4 md:gap-8">
-                            {socialLinks.slice(0, 2).map((link) => (
-                                <a
-                                    key={link.label}
-                                    href={link.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label={link.ariaLabel}
-                                    className="text-sm font-medium text-[#1b1b18]/70 underline decoration-[#1b1b18]/30 underline-offset-2 hover:text-[#1b1b18] hover:decoration-[#1b1b18]/50 dark:text-[#EDEDEC]/70 dark:decoration-[#EDEDEC]/30 dark:hover:text-[#EDEDEC] dark:hover:decoration-[#EDEDEC]/50"
-                                >
-                                    {link.label}
-                                </a>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={copyEmail}
-                                className="rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
-                            >
-                                {copied ? 'Copied!' : 'Copy email'}
-                            </button>
-                            {socialLinks.slice(2).map((link) => (
-                                <a
-                                    key={link.label}
-                                    href={link.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label={link.ariaLabel}
-                                    className="text-sm font-medium text-[#1b1b18]/70 underline decoration-[#1b1b18]/30 underline-offset-2 hover:text-[#1b1b18] hover:decoration-[#1b1b18]/50 dark:text-[#EDEDEC]/70 dark:decoration-[#EDEDEC]/30 dark:hover:text-[#EDEDEC] dark:hover:decoration-[#EDEDEC]/50"
-                                >
-                                    {link.label}
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+                <ContactSection id="contact" title="Say hello" showNewsletter />
             </div>
         </>
     );
