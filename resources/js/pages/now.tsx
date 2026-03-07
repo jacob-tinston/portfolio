@@ -8,10 +8,9 @@ import { useEffect, useRef } from 'react';
 gsap.registerPlugin(ScrollTrigger);
 
 const nowItems = [
-    { title: 'Building', description: 'Working on my portfolio and exploring new interaction patterns.' },
-    { title: 'Learning', description: 'Diving deeper into animation, creative coding, and design systems.' },
-    { title: 'Reading', description: 'Currently reading about typography and visual storytelling.' },
-    { title: 'Exploring', description: 'Experimenting with generative art and physics simulations.' },
+    { title: 'Building', description: 'Currently at Altlabs looking after existing clients, working on new projects and building a range of AI products. The new stuff is where most of my energy goes but improving what\'s already there is just as interesting when the problems are right.' },
+    { title: 'Learning', description: 'Expanding my knowledge on AI architecture and systems design. Spending most of my time right now on RAG and retrieval patterns, but also working through how to build LLM-powered systems that are reliable in production.' },
+    { title: 'Reading', description: 'Halfway through \'Cosmos\' by Carl Sagan. I\'ve always been fascinated by the vastness of the universe - it\'s interesting to think about our role in it and how we fit in.' },
 ];
 
 export default function Now() {
@@ -20,26 +19,32 @@ export default function Now() {
     useEffect(() => {
         const ctx = gsap.context(() => {
             gsap.from('.page-title', {
-                y: 24,
+                y: 20,
                 opacity: 0,
-                duration: 0.55,
+                duration: 0.5,
                 delay: 0.1,
                 ease: 'power2.out',
             });
-            gsap.from('.now-card', {
-                y: 28,
+            gsap.from('.page-subtext', {
+                y: 12,
                 opacity: 0,
-                scale: 0.98,
-                stagger: 0.08,
-                duration: 0.7,
+                duration: 0.5,
                 delay: 0.2,
                 ease: 'power2.out',
             });
-            gsap.from('.now-card .word', {
+            gsap.from('.page-subtext .word', {
                 yPercent: 120,
-                stagger: 0.04,
-                duration: 0.6,
-                delay: 0.5,
+                stagger: 0.03,
+                duration: 0.5,
+                delay: 0.35,
+                ease: 'power2.out',
+            });
+            gsap.from('.now-item', {
+                y: 14,
+                opacity: 0,
+                stagger: 0.06,
+                duration: 0.5,
+                delay: 0.38,
                 ease: 'power2.out',
             });
         }, containerRef);
@@ -52,22 +57,38 @@ export default function Now() {
             <Head title="Now" />
             <div ref={containerRef} className="pt-36 pb-24">
                 <div className="mx-auto max-w-[700px] px-6">
-                    <h1 className="page-title font-title mb-16 text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
-                        <MorphWordIn>Now</MorphWordIn>
-                    </h1>
-                    <div className="grid gap-6 md:grid-cols-2">
-                        {nowItems.map((item, i) => (
-                            <div
-                                key={i}
-                                className="now-card relative z-10 rounded-2xl border border-white/30 bg-white/60 p-6 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20"
+                    <header className="mb-12">
+                        <h1 className="page-title font-title mb-4 text-3xl font-light leading-tight tracking-tight text-[#1b1b18] dark:text-[#EDEDEC] sm:text-4xl md:text-5xl lg:text-5xl">
+                            <MorphWordIn>Now</MorphWordIn>
+                        </h1>
+                        <p className="page-subtext text-lg leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
+                            <MaskedWords
+                                links={[
+                                    {
+                                        word: '/now',
+                                        href: 'https://nownownow.com/about',
+                                        external: true,
+                                    },
+                                ]}
+                                linkClassName="underline decoration-[#1b1b18]/30 underline-offset-2 transition-colors hover:decoration-[#1b1b18]/60 dark:decoration-[#EDEDEC]/30 dark:hover:decoration-[#EDEDEC]/60"
                             >
-                                <h2 className="mb-2 text-lg font-semibold">{item.title}</h2>
-                                <p className="text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50">
-                                    <MaskedWords>{item.description}</MaskedWords>
-                                </p>
+                                This is my /now page. It's where I keep track of what I'm currently working on, learning and thinking about.
+                            </MaskedWords>
+                        </p>
+                    </header>
+
+                    <dl className="space-y-8">
+                        {nowItems.map((item, i) => (
+                            <div key={i} className="now-item">
+                                <dt className="mb-1.5 font-mono text-xs uppercase tracking-widest text-[#1b1b18]/40 dark:text-[#EDEDEC]/40">
+                                    {item.title}
+                                </dt>
+                                <dd className="text-base leading-relaxed text-[#1b1b18] dark:text-[#EDEDEC] md:text-lg">
+                                    {item.description}
+                                </dd>
                             </div>
                         ))}
-                    </div>
+                    </dl>
                 </div>
             </div>
         </>

@@ -30,7 +30,7 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Jacob Tinston') }}</title>
+        <title inertia>{{ config('app.name', 'Jacob Tinston | Software & AI Engineer') }}</title>
 
         <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -42,7 +42,7 @@
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased">
+    <body class="overflow-x-hidden font-sans antialiased">
         @inertia
     </body>
 </html>

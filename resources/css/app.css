@@ -190,7 +190,7 @@ html.lenis body {
 .morph-container {
     position: relative;
     display: inline-block;
-    filter: url(#threshold) blur(0.5px);
+    filter: url(#threshold) blur(0px);
 }
 
 .morph-text {

@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Jacob Tinston';
+const appName = import.meta.env.VITE_APP_NAME || 'Jacob Tinston | Software & AI Engineer';
 
 const SITE_PAGES = ['home', 'projects', 'now', 'contact'];
 
@@ -17,7 +17,7 @@ const pageModules = {
 };
 
 createInertiaApp({
-    title: (title) => (title ? `${title}` : appName),
+    title: (title) => (title ? `${title} | ${appName}` : appName),
     resolve: (name) =>
         resolvePageComponent(
             `./pages/${name}.tsx`,
@@ -51,3 +51,37 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// ── Console easter egg ──
+console.log(`
+    %c
+      ████████████████     ████████████████████
+      ████████████████     ████████████████████
+      ░░░░░░████░░░░░░     ░░░░░░░░████░░░░░░░░
+            ████                   ████
+            ████                   ████
+            ████                   ████
+            ████                   ████
+            ████                   ████
+            ████                   ████
+            ████                   ████
+            ████                   ████
+      ▓▓   █████                   ████
+       ▓▓▓██████                   ████
+        ▓██████                    ████
+         ▓███▓                     ████
+    
+    `, 'font-family: monospace; color: #e2e8f0;');
+
+console.log(`%c  ╔════════════════════════════════════════════════╗
+  ║                                                ║
+  ║ 👋 Hey, curious one. This site was built with: ║
+  ║                                                ║
+  ║ ⚙️ Laravel    — The engine under the hood      ║
+  ║ 🔗 Inertia.js — Seamless SPA, no API needed    ║
+  ║ 🎞️ GSAP       — Making things move beautifully ║
+  ║                                                ║
+  ║ Built with ❤️ by Jacob.                        ║
+  ║                                                ║
+  ╚════════════════════════════════════════════════╝`,
+  'font-family: monospace; color: #94a3b8; font-size: 12px;');

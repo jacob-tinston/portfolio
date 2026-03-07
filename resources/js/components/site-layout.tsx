@@ -1,14 +1,28 @@
 'use client';
 
 import CursorGlyphs from '@/components/cursor-glyphs';
+import { TerminalOverlay } from '@/components/terminal-overlay';
 import { ActiveNavContext, useActiveNav } from '@/contexts/active-nav-context';
 import { useAppearance } from '@/hooks/use-appearance';
 import { Link, usePage } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { Menu, Moon, Sun, X } from 'lucide-react';
+import { Menu, Moon, Sun, Terminal, X } from 'lucide-react';
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+function TerminalToggle({ active, onClick }: { active: boolean; onClick: () => void }) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            aria-label={active ? 'Close terminal' : 'Open terminal'}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/60 text-[#1b1b18] shadow-lg shadow-black/[0.04] backdrop-blur-xl transition-colors hover:text-[#1b1b18]/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-[#EDEDEC] dark:shadow-black/20 dark:hover:text-[#EDEDEC]/90"
+        >
+            <Terminal className="size-4" aria-hidden />
+        </button>
+    );
+}
 
 function ThemeToggle() {
     const { resolvedAppearance, updateAppearance } = useAppearance();
@@ -146,14 +160,29 @@ function NavLinks({
     );
 }
 
-function SiteNav({ lenisRef }: { lenisRef: React.RefObject<Lenis | null> }) {
+function SiteNav({
+    lenisRef,
+    terminalOpen,
+    onTerminalToggle,
+}: {
+    lenisRef: React.RefObject<Lenis | null>;
+    terminalOpen: boolean;
+    onTerminalToggle: () => void;
+}) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        <header className="fixed top-4 left-0 right-0 z-50 px-4 pt-4">
-            <div className="mx-auto flex max-w-[700px] items-center justify-between gap-4">
-                <div className="flex flex-1 items-center justify-start">
-                    <ThemeToggle />
+        <header className="fixed top-4 left-0 right-0 z-50 pt-4">
+            <div className="mx-auto flex max-w-[700px] px-6 items-center justify-between gap-4">
+                {/* Left: terminal toggle (desktop) / terminal + theme (mobile) */}
+                <div className="flex flex-1 items-center justify-start gap-2">
+                    <span className="hidden sm:inline-flex">
+                        <TerminalToggle active={terminalOpen} onClick={onTerminalToggle} />
+                    </span>
+                    <span className="flex items-center gap-2 sm:hidden">
+                        <TerminalToggle active={terminalOpen} onClick={onTerminalToggle} />
+                        <ThemeToggle />
+                    </span>
                 </div>
                 <nav
                     className="hidden items-center gap-1 rounded-full border border-white/30 bg-white/60 px-2 py-1.5 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 sm:flex"
@@ -162,6 +191,9 @@ function SiteNav({ lenisRef }: { lenisRef: React.RefObject<Lenis | null> }) {
                     <NavLinks lenisRef={lenisRef} variant="desktop" />
                 </nav>
                 <div className="flex flex-1 items-center justify-end">
+                    <span className="hidden sm:inline-flex">
+                        <ThemeToggle />
+                    </span>
                     <button
                         type="button"
                         onClick={() => setMobileMenuOpen((o) => !o)}
@@ -188,7 +220,7 @@ function SiteNav({ lenisRef }: { lenisRef: React.RefObject<Lenis | null> }) {
                         className="absolute inset-0"
                         aria-label="Close menu"
                     />
-                    <div className="absolute left-4 right-4 top-0 rounded-2xl border border-white/30 bg-white/60 p-4 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20">
+                    <div className="absolute left-6 right-6 top-0 rounded-2xl border border-white/30 bg-white/60 p-4 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20">
                         <NavLinks
                             lenisRef={lenisRef}
                             variant="mobile"
@@ -206,7 +238,22 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
     const pathname = getPathname(url);
     const initialActive = getInitialActive(pathname);
     const [activeNav, setActiveNav] = useState(initialActive);
+    const [terminalOpen, setTerminalOpen] = useState(false);
     const lenisRef = useRef<Lenis | null>(null);
+
+    useEffect(() => {
+        if (terminalOpen) {
+            lenisRef.current?.stop();
+            document.documentElement.classList.add('overflow-hidden');
+        } else {
+            lenisRef.current?.start();
+            document.documentElement.classList.remove('overflow-hidden');
+        }
+        return () => {
+            lenisRef.current?.start();
+            document.documentElement.classList.remove('overflow-hidden');
+        };
+    }, [terminalOpen]);
     const footerRef = useRef<HTMLElement | null>(null);
     const footerTweenRef = useRef<gsap.core.Tween | null>(null);
 
@@ -243,6 +290,17 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
             gsap.ticker.remove(raf);
             lenis.destroy();
             lenisRef.current = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const onDrawerOpen = () => lenisRef.current?.stop();
+        const onDrawerClose = () => lenisRef.current?.start();
+        window.addEventListener('project-drawer:open', onDrawerOpen);
+        window.addEventListener('project-drawer:close', onDrawerClose);
+        return () => {
+            window.removeEventListener('project-drawer:open', onDrawerOpen);
+            window.removeEventListener('project-drawer:close', onDrawerClose);
         };
     }, []);
 
@@ -296,11 +354,16 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
             <div className="relative isolate flex min-h-screen flex-col bg-[#FDFDFC] text-[#1b1b18] dark:bg-[#0a0a0a] dark:text-[#EDEDEC]">
                 <CursorGlyphs />
                 <div className="relative z-10 isolate flex flex-1 flex-col">
-                    <SiteNav lenisRef={lenisRef} />
+                    <SiteNav
+                        lenisRef={lenisRef}
+                        terminalOpen={terminalOpen}
+                        onTerminalToggle={() => setTerminalOpen((o) => !o)}
+                    />
                     <main className="flex-1">{children}</main>
                     <FooterTinston ref={footerRef} />
                 </div>
             </div>
+            <TerminalOverlay open={terminalOpen} onClose={() => setTerminalOpen(false)} />
         </ActiveNavContext.Provider>
     );
 }

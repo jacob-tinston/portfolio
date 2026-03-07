@@ -52,7 +52,6 @@ export function ContactSection({
         const toProps = { y: 0, opacity: 1, duration: 0.55, ease: 'power2.out' as const };
         const pageRevealDelay = 0.5;
 
-        gsap.fromTo(el.querySelector('h2'), fromProps, { ...toProps, delay: pageRevealDelay + 0.1 });
         gsap.fromTo(el.querySelector('.contact-intro'), fromProps, { ...toProps, delay: pageRevealDelay + 0.2 });
         gsap.fromTo(el.querySelector('.contact-newsletter'), {
             y: 28,
@@ -109,7 +108,7 @@ export function ContactSection({
 
                 {showNewsletter && (
                     <div className="contact-newsletter relative z-10 mb-16 rounded-2xl border border-white/30 bg-white/60 p-6 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 md:p-8">
-                        <h3 className="mb-2 text-sm font-medium uppercase tracking-wider text-[#1b1b18]/60 dark:text-[#EDEDEC]/60">
+                        <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-[#1b1b18]/40 dark:text-[#EDEDEC]/40">
                             Get updates from me
                         </h3>
                         <p className="mb-4 text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
@@ -127,7 +126,7 @@ export function ContactSection({
                             />
                             <button
                                 type="button"
-                                className="shrink-0 rounded-lg border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
+                                className="shrink-0 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
                             >
                                 Subscribe
                             </button>

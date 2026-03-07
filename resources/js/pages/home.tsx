@@ -1,22 +1,19 @@
 import { ContactSection } from '@/components/contact-section';
+import { ProjectDrawer } from '@/components/project-drawer';
+import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, projects, type Project } from '@/data/projects';
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { useActiveNav } from '@/contexts/active-nav-context';
 import { Head, Link } from '@inertiajs/react';
+
+
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const SECTION_IDS = ['about', 'projects', 'contact'];
-
-const projects = [
-    { title: 'Project One', description: 'A brief description of what this project does and the problems it solves.', tags: ['React', 'TypeScript'] },
-    { title: 'Project Two', description: 'Another project showcasing different skills and technologies.', tags: ['Jacob Tinston', 'PHP'] },
-    { title: 'Project Three', description: 'Something creative and experimental pushing boundaries.', tags: ['GSAP', 'Canvas'] },
-    { title: 'Project Four', description: 'A practical tool built to solve real-world problems.', tags: ['Node.js', 'API'] },
-];
 
 function SplitChars({ children, className }: { children: string; className?: string }) {
     return (
@@ -32,8 +29,8 @@ function SplitChars({ children, className }: { children: string; className?: str
 
 const HERO_WORDS = ['software.', 'mobile apps.', 'tools.', 'automations.', 'AI agents.', 'for the web.'];
 
-const MORPH_TIME = 2.5;
-const COOLDOWN_TIME = 2.5;
+const MORPH_TIME = 2;
+const COOLDOWN_TIME = 3;
 
 function MorphWord() {
     const text1Ref = useRef<HTMLSpanElement>(null);
@@ -158,6 +155,9 @@ function MorphWord() {
 export default function Home() {
     const { setActiveNav } = useActiveNav();
     const containerRef = useRef<HTMLDivElement>(null);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const openProject = useCallback((project: Project) => setSelectedProject(project), []);
+    const closeProject = useCallback(() => setSelectedProject(null), []);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -234,12 +234,50 @@ export default function Home() {
                 },
             });
 
+            // ── Projects: intro subtext (masked words entrance when section is in view / pinned) ──
+            gsap.from('#projects .projects-intro .word', {
+                yPercent: 120,
+                stagger: 0.04,
+                duration: 0.65,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: '#projects',
+                    start: 'top top',
+                    once: true,
+                },
+            });
+
             // ── Projects: horizontal scroll (longer pin so it doesn't snap early; scroll distance = track travel × multiplier) ──
             const track = document.querySelector<HTMLElement>('.projects-track');
             if (track) {
                 const getEndPadding = () => (window.innerWidth < 768 ? 180 : 320);
-                const getScrollAmount = () =>
-                    Math.max(0, track.scrollWidth - window.innerWidth + getEndPadding());
+                const getScrollAmount = () => {
+                    if (window.innerWidth < 768) {
+                        const container =
+                            track.querySelector<HTMLElement>('.projects-cards-container');
+                        const seeMore =
+                            track.querySelector<HTMLElement>('.projects-see-more');
+                        if (container && seeMore) {
+                            const trackX = Number(gsap.getProperty(track, 'x')) || 0;
+                            const trackLeftAtRest =
+                                track.getBoundingClientRect().left - trackX;
+                            const seeMoreCenterFromTrack =
+                                container.offsetLeft +
+                                seeMore.offsetLeft +
+                                seeMore.offsetWidth / 2;
+                            return Math.max(
+                                0,
+                                trackLeftAtRest +
+                                    seeMoreCenterFromTrack -
+                                    window.innerWidth / 2,
+                            );
+                        }
+                    }
+                    return Math.max(
+                        0,
+                        track.scrollWidth - window.innerWidth + getEndPadding(),
+                    );
+                };
                 const scrollMultiplier = 2.4;
 
                 const horizontalTween = gsap.to(track, {
@@ -256,24 +294,62 @@ export default function Home() {
                     },
                 });
 
-                gsap.utils.toArray<HTMLElement>('.project-card').forEach((card) => {
-                    gsap.from(card, {
-                        y: 100,
-                        opacity: 0,
-                        rotation: 4,
-                        scrollTrigger: {
-                            trigger: card,
-                            containerAnimation: horizontalTween,
-                            start: 'left 92%',
-                            end: 'left 70%',
-                            scrub: 1,
-                            invalidateOnRefresh: true,
-                        },
-                    });
-                });
             }
 
+            // ── Projects: cards container entrance (when section comes into view) ──
+            gsap.from('.projects-cards-container', {
+                y: 28,
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: '#projects',
+                    start: 'top 70%',
+                    once: true,
+                },
+            });
+
             // Section titles use MorphWordIn component (same morph as hero MorphWord)
+
+            // ── Craft (What/Why/How) ──
+            gsap.from('.craft-what', {
+                x: -32,
+                opacity: 0,
+                duration: 0.7,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.craft-what', start: 'top 85%', once: true },
+            });
+            gsap.from('.craft-why', {
+                x: 32,
+                opacity: 0,
+                duration: 0.7,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.craft-why', start: 'top 85%', once: true },
+            });
+            gsap.from('.craft-how', {
+                y: 40,
+                opacity: 0,
+                duration: 0.7,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.craft-how', start: 'top 85%', once: true },
+            });
+            gsap.from('.craft-tech-badge', {
+                scale: 0.85,
+                opacity: 0,
+                stagger: 0.04,
+                duration: 0.4,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.craft-how', start: 'top 80%', once: true },
+            });
+
+            // ── Blog ──
+            gsap.from('.blog-header', {
+                y: 24,
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.blog-header', start: 'top 85%', once: true },
+            });
 
             // ── Contact: intro, newsletter, socials + word reveal ──
             gsap.from('#contact .contact-intro', {
@@ -319,7 +395,7 @@ export default function Home() {
             <Head title="Jacob Tinston | Software & AI Engineer" />
             <div ref={containerRef}>
                 {/* ── Hero (above About) ── */}
-                <section className="px-6 pt-20 pb-4 sm:pt-36">
+                <section className="px-6 pt-28 pb-4 sm:pt-36">
                     <div className="mx-auto max-w-[700px]">
                         <div className="hero-card relative z-10 flex flex-col gap-8 overflow-hidden rounded-2xl border border-white/30 bg-white/60 p-8 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 sm:flex-row sm:items-center sm:gap-10 sm:p-10">
                             <div className="hero-card-content flex flex-1 flex-col justify-center">
@@ -365,26 +441,44 @@ export default function Home() {
                 </section>
 
                 {/* ── Projects (Horizontal Scroll) ── */}
-                <section id="projects" className="relative overflow-x-hidden">
+                <section
+                    id="projects"
+                    className="relative w-full max-w-[100vw] overflow-x-hidden"
+                >
                     <div className="projects-track flex h-screen min-h-[500px] items-center gap-5 pl-5 pr-5 md:min-h-[600px] md:gap-10 md:pl-[max(1.5rem,50vw-350px)] md:pr-12">
-                        <div className="projects-title-column flex h-full w-[32vw] min-w-[7rem] max-w-[11rem] shrink-0 flex-col justify-center pr-4 md:w-auto md:min-w-[280px] md:max-w-[380px] md:pr-4">
+                        <div className="projects-title-column flex h-full w-[62vw] min-w-[12rem] max-w-[20rem] shrink-0 flex-col justify-center pr-4 md:w-auto md:min-w-[280px] md:max-w-[380px] md:pr-4">
                             <h2 className="font-title mb-2 text-3xl font-light leading-tight tracking-tight md:mb-4 sm:text-4xl md:text-5xl lg:text-5xl">
-                                <MorphWordIn>Projects</MorphWordIn>
+                                <MorphWordIn>My projects</MorphWordIn>
                             </h2>
-                            <p className="text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50 md:text-base">
-                                <MaskedWords>A selection of things I&apos;ve built, shipped, and obsessed over.</MaskedWords>
+                            <p className="projects-intro text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50 md:text-base">
+                                <MaskedWords>{PROJECTS_INTRO}</MaskedWords>
                             </p>
                         </div>
 
-                        {projects.map((project, i) => (
-                            <div
+                        <div className="projects-cards-container flex gap-5 md:gap-10 shrink-0">
+                        {projects.slice(0, 4).map((project, i) => (
+                            <button
                                 key={i}
-                                className="project-card relative z-10 flex h-[58vh] min-h-[400px] w-[calc((100vw-10rem)/1.25)] min-w-[280px] shrink-0 flex-col justify-between rounded-2xl border border-white/30 bg-white/60 p-6 shadow-lg shadow-black/[0.04] backdrop-blur-xl md:h-[70vh] md:min-h-[520px] md:min-w-0 md:w-[340px] md:p-8 lg:w-[400px] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20"
+                                type="button"
+                                onClick={() => openProject(project)}
+                                className="project-card group relative z-10 flex h-[58vh] min-h-[400px] w-[calc((100vw-10rem)/1.25)] min-w-[280px] shrink-0 cursor-pointer flex-col justify-between rounded-2xl border border-white/30 bg-white/60 p-6 text-left shadow-lg shadow-black/[0.04] backdrop-blur-xl transition-colors hover:border-white/50 hover:bg-white/80 md:h-[70vh] md:min-h-[520px] md:min-w-0 md:w-[340px] md:p-8 lg:w-[400px] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 dark:hover:border-white/20 dark:hover:bg-white/[0.10]"
                             >
-                                <div>
-                                    <div className="mb-4 h-36 rounded-xl bg-[#f5f5f4] dark:bg-[#1e1e1d] md:mb-6 md:h-48 lg:h-56" />
-                                    <h3 className="mb-2 text-lg font-semibold md:text-xl">{project.title}</h3>
-                                    <p className="text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50 md:text-base">
+                                <div className="min-w-0">
+                                    <div className="mb-4 h-36 overflow-hidden rounded-xl bg-[#f5f5f4] dark:bg-[#1e1e1d] md:mb-6 md:h-48 lg:h-56">
+                                        <img
+                                            src={project.image}
+                                            alt=""
+                                            className="size-full object-cover"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display =
+                                                    'none';
+                                            }}
+                                        />
+                                    </div>
+                                    <h3 className="mb-2 truncate text-lg font-semibold md:text-xl">
+                                        {project.title}
+                                    </h3>
+                                    <p className="line-clamp-6 text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50 md:line-clamp-none md:text-base">
                                         <MaskedWords>{project.description}</MaskedWords>
                                     </p>
                                 </div>
@@ -398,15 +492,15 @@ export default function Home() {
                                         </span>
                                     ))}
                                 </div>
-                            </div>
+                            </button>
                         ))}
 
-                        <div className="projects-see-more relative z-10 flex min-w-[280px] shrink-0 flex-col justify-center rounded-2xl border border-white/30 bg-white/60 px-8 py-12 shadow-lg shadow-black/[0.06] backdrop-blur-xl md:min-h-[520px] md:w-[340px] md:min-w-[340px] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/30 lg:w-[400px]">
+                        <div className="projects-see-more relative z-10 flex w-[calc((100vw-10rem)/1.25)] min-w-[280px] shrink-0 flex-col justify-center self-center rounded-2xl border border-white/30 bg-white/60 px-8 py-12 shadow-lg shadow-black/[0.06] backdrop-blur-xl md:w-[340px] md:min-w-[340px] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/30 lg:w-[400px]">
                             <p className="mb-4 text-lg font-medium text-[#1b1b18] dark:text-[#EDEDEC]">
                                 See more
                             </p>
                             <p className="mb-6 text-sm leading-relaxed text-[#1b1b18]/60 dark:text-[#EDEDEC]/50">
-                                <MaskedWords>View the full projects archive and case studies.</MaskedWords>
+                                <MaskedWords>{PROJECTS_ARCHIVE_INTRO}</MaskedWords>
                             </p>
                             <Link
                                 href="/projects"
@@ -416,14 +510,144 @@ export default function Home() {
                                 <span aria-hidden>→</span>
                             </Link>
                         </div>
+                        </div>
 
                         <div className="w-8 shrink-0 md:w-24" />
+                    </div>
+                </section>
+
+                {/* ── What / Why / How ── */}
+                <section id="craft" className="overflow-x-hidden px-6 py-28">
+                    <div className="mx-auto max-w-[700px]">
+                        <div className="space-y-20">
+                            {/* WHAT */}
+                            <div className="craft-what relative">
+                                <span
+                                    className="pointer-events-none absolute -top-6 -left-2 select-none font-title text-[96px] font-bold leading-none tracking-tighter text-[#1b1b18]/[0.03] dark:text-[#EDEDEC]/[0.04] sm:text-[128px]"
+                                    aria-hidden
+                                >
+                                    WHAT
+                                </span>
+                                <div className="relative z-10">
+                                    <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
+                                        01 — what
+                                    </span>
+                                    <h3 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
+                                        What I do
+                                    </h3>
+                                    <p className="text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70 md:text-base">
+                                        I build digital products across the full stack. I've worked with marketing agencies, SaaS companies, large organisations and the public sector, building everything from e-commerce platforms and mobile apps to internal tools and AI-powered systems. I'm involved from the architecture through to what the end user actually sees. Most of my recent work has been in AI, building products that automate the kind of work that used to take people hours and making them accessible to people who aren't technical.
+                                    </p>
+                                </div>
+                            </div> 
+
+                            {/* WHY */}
+                            <div className="craft-why relative">
+                                <span
+                                    className="pointer-events-none absolute -top-6 -right-2 select-none font-title text-[96px] font-bold leading-none tracking-tighter text-[#1b1b18]/[0.03] dark:text-[#EDEDEC]/[0.04] sm:text-[128px]"
+                                    aria-hidden
+                                >
+                                    WHY
+                                </span>
+                                <div className="relative z-10 text-right">
+                                    <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
+                                        02 — why
+                                    </span>
+                                    <h3 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
+                                        Why I do it
+                                    </h3>
+                                    <p className="text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70 md:text-base">
+                                        After 6 months in college, I decided that I wanted to build things rather than read about them. I started teaching myself how to code in between lessons before landing a job building websites at a local marketing agency. The first time something I built had a real impact on the businesses we worked with, I understood why I'd dropped out. Since then every move I've made has been toward harder problems and higher stakes. Websites became bespoke software, mobile apps, infrastructure and most recently AI systems - and I'm still not done pulling on that thread.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* HOW */}
+                            <div className="craft-how relative">
+                                <span
+                                    className="pointer-events-none absolute -top-6 -left-2 select-none font-title text-[96px] font-bold leading-none tracking-tighter text-[#1b1b18]/[0.03] dark:text-[#EDEDEC]/[0.04] sm:text-[128px]"
+                                    aria-hidden
+                                >
+                                    HOW
+                                </span>
+                                <div className="relative z-10">
+                                    <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
+                                        03 — how
+                                    </span>
+                                    <h3 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
+                                        How I do it
+                                    </h3>
+                                    <p className="mb-8 text-sm leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70 md:text-base">
+                                        I learn by building. That's how I taught myself to code and it's still how I pick up anything new. I move fast, ship early, and improve based on what I see rather than what I assumed.
+                                    </p>
+
+                                    <div className="space-y-6">
+                                        {[
+                                            {
+                                                label: 'Languages',
+                                                items: ['Laravel', 'React', 'TypeScript', 'Flutter', 'Swift', '.NET', 'Tailwind'],
+                                            },
+                                            {
+                                                label: 'Infra & tooling',
+                                                items: ['MySQL', 'AWS', 'Azure', 'Git', 'CI/CD'],
+                                            },
+                                        ].map(({ label, items }) => (
+                                            <div key={label}>
+                                                <span className="mb-2 block font-mono text-[10px] uppercase tracking-widest text-[#1b1b18]/25 dark:text-[#EDEDEC]/25">
+                                                    {label}
+                                                </span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {items.map((item) => (
+                                                        <span
+                                                            key={item}
+                                                            className="craft-tech-badge rounded-full border border-[#1b1b18]/10 bg-[#1b1b18]/[0.03] px-3 py-1 font-mono text-xs text-[#1b1b18]/60 dark:border-[#EDEDEC]/10 dark:bg-[#EDEDEC]/[0.04] dark:text-[#EDEDEC]/50"
+                                                        >
+                                                            {item}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── Blog ── */}
+                <section id="thoughts" className="px-6 py-14">
+                    <div className="mx-auto max-w-[700px]">
+                        <div className="blog-header relative z-10 overflow-hidden rounded-2xl border border-white/30 bg-white/60 p-8 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 md:p-10">
+                            <div className="mb-3 flex items-center justify-between gap-6">
+                                <h2 className="font-title text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
+                                    <MorphWordIn>Thoughts</MorphWordIn>
+                                </h2>
+                                <div className="hidden">
+                                    <Link
+                                        href="/thoughts"
+                                        className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
+                                    >
+                                        All posts
+                                        <span aria-hidden>→</span>
+                                    </Link>
+                                </div>
+                            </div>
+                            <p className="mb-8 text-lg leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
+                                <MaskedWords>Sometimes I write about things I'm thinking about. Some are quick thoughts, some turn into longer posts.</MaskedWords>
+                            </p>
+
+                            <p className="text-sm leading-relaxed text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
+                                Nothing here yet.
+                            </p>
+                        </div>
                     </div>
                 </section>
 
                 {/* ── Contact ── */}
                 <ContactSection id="contact" title="Say hello" showNewsletter />
             </div>
+            <ProjectDrawer project={selectedProject} onClose={closeProject} />
         </>
     );
 }

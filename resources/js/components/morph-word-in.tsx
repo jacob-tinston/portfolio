@@ -3,7 +3,7 @@
 import gsap from 'gsap';
 import { useEffect, useId, useRef, useState } from 'react';
 
-const MORPH_DURATION = 1.5;
+const MORPH_DURATION = 2;
 
 function setMorph(
     text1: HTMLSpanElement | null,
@@ -114,7 +114,7 @@ export function MorphWordIn({
                 ref={containerRef}
                 className={`relative inline-block ${className ?? ''}`}
                 style={{
-                    filter: `url(#threshold-${id}) blur(0.5px)`,
+                    filter: `url(#threshold-${id}) blur(0px)`,
                     opacity: visible ? 1 : 0,
                 }}
                 aria-label={children}
