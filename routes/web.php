@@ -7,6 +7,8 @@ Route::inertia('/projects', 'projects')->name('projects');
 Route::inertia('/now', 'now')->name('now');
 Route::inertia('/contact', 'contact')->name('contact');
 
+Route::post('/newsletter', App\Http\Controllers\NewsletterSubscribeController::class)->name('newsletter.subscribe');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });

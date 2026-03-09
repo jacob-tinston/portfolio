@@ -2,11 +2,13 @@
 
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
+import { subscribe } from '@/routes/newsletter';
 import { Check, Copy } from 'lucide-react';
 import gsap from 'gsap';
 import { useEffect, useRef, useState } from 'react';
 
 const CONTACT_EMAIL = 'jacob@tinston.dev';
+const SUBSCRIBED_DURATION_MS = 4000;
 
 const socialLinks = [
     { label: 'X', href: 'https://x.com/jacob_tinston', ariaLabel: 'X (Twitter)' },
@@ -43,6 +45,9 @@ export function ContactSection({
 }) {
     const [newsletterEmail, setNewsletterEmail] = useState('');
     const [copied, setCopied] = useState(false);
+    const [subscribed, setSubscribed] = useState(false);
+    const [subscribing, setSubscribing] = useState(false);
+    const [subscribeError, setSubscribeError] = useState<string | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -90,6 +95,40 @@ export function ContactSection({
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleNewsletterSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubscribeError(null);
+        const email = newsletterEmail.trim();
+        if (!email) return;
+        setSubscribing(true);
+        const csrfToken =
+            document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+        try {
+            const res = await fetch(subscribe.url(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ email }),
+                credentials: 'same-origin',
+            });
+            const data = (await res.json().catch(() => ({}))) as { message?: string; errors?: Record<string, string[]> };
+            if (!res.ok) {
+                const msg =
+                    data.errors?.email?.[0] ?? data.message ?? 'Something went wrong. Please try again.';
+                setSubscribeError(msg);
+                return;
+            }
+            setSubscribed(true);
+            setNewsletterEmail('');
+            setTimeout(() => setSubscribed(false), SUBSCRIBED_DURATION_MS);
+        } finally {
+            setSubscribing(false);
+        }
+    };
+
     return (
         <section
             ref={sectionRef}
@@ -115,22 +154,55 @@ export function ContactSection({
                             I occasionally write about the things I&apos;m building, stuff I&apos;m learning, or just
                             general thoughts. I don&apos;t have a schedule, I just write when I have something to say.
                         </p>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <form
+                            onSubmit={handleNewsletterSubmit}
+                            className="flex flex-col gap-3 sm:flex-row sm:items-center"
+                        >
                             <input
                                 type="email"
                                 placeholder="you@example.com"
                                 value={newsletterEmail}
-                                onChange={(e) => setNewsletterEmail(e.target.value)}
-                                className="min-w-0 flex-1 rounded-lg border border-[#e3e3e0] bg-[#fafaf9] px-4 py-2.5 text-[#1b1b18] placeholder:text-[#1b1b18]/40 focus:border-[#1b1b18]/30 focus:outline-none focus:ring-2 focus:ring-[#1b1b18]/10 dark:border-[#2a2a28] dark:bg-[#0a0a0a] dark:text-[#EDEDEC] dark:placeholder:text-[#EDEDEC]/40 dark:focus:border-[#EDEDEC]/30 dark:focus:ring-[#EDEDEC]/10"
+                                onChange={(e) => {
+                                    setNewsletterEmail(e.target.value);
+                                    setSubscribeError(null);
+                                }}
+                                disabled={subscribing}
+                                className="min-w-0 flex-1 rounded-lg border border-[#e3e3e0] bg-[#fafaf9] px-4 py-2.5 text-[#1b1b18] placeholder:text-[#1b1b18]/40 focus:border-[#1b1b18]/30 focus:outline-none focus:ring-2 focus:ring-[#1b1b18]/10 disabled:opacity-60 dark:border-[#2a2a28] dark:bg-[#0a0a0a] dark:text-[#EDEDEC] dark:placeholder:text-[#EDEDEC]/40 dark:focus:border-[#EDEDEC]/30 dark:focus:ring-[#EDEDEC]/10"
                                 aria-label="Email for newsletter"
+                                aria-invalid={!!subscribeError}
+                                aria-describedby={subscribeError ? 'newsletter-error' : undefined}
                             />
                             <button
-                                type="button"
-                                className="shrink-0 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
+                                type="submit"
+                                disabled={subscribing || !newsletterEmail.trim()}
+                                className="relative flex shrink-0 items-center justify-center gap-2 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] disabled:opacity-60 dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
+                                aria-label={subscribed ? 'Subscribed' : 'Subscribe to newsletter'}
                             >
-                                Subscribe
+                                <span
+                                    className={`transition-all duration-200 ${
+                                        subscribed ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
+                                    }`}
+                                >
+                                    {subscribing ? 'Subscribing…' : 'Subscribe'}
+                                </span>
+                                <Check
+                                    className={`absolute size-4 transition-all duration-200 ${
+                                        subscribed ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                                    }`}
+                                    aria-hidden
+                                />
                             </button>
-                        </div>
+                        </form>
+                        {subscribed && (
+                            <p className="mt-3 text-sm font-medium text-[#1b1b18]/80 dark:text-[#EDEDEC]/90">
+                                Thanks for subscribing - I&apos;ll be in touch when I have something new to share.
+                            </p>
+                        )}
+                        {subscribeError && (
+                            <p id="newsletter-error" className="mt-3 text-sm text-red-600 dark:text-red-400">
+                                {subscribeError}
+                            </p>
+                        )}
                     </div>
                 )}
 

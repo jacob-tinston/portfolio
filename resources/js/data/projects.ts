@@ -58,3 +58,11 @@ export const projects: Project[] = [
         playStoreUrl: undefined,
     },
 ];
+
+/** Featured project titles for the home slider, in display order. */
+const FEATURED_SLIDER_TITLES = ['COPA', 'TaperedView', 'Roger That', 'HomeHub'] as const;
+
+/** Projects for the home page slider (featured order). Projects page still uses `projects` (most recent first). */
+export const featuredProjects: Project[] = FEATURED_SLIDER_TITLES.map(
+    (title) => projects.find((p) => p.title === title)!,
+).filter(Boolean);

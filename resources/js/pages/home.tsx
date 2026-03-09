@@ -1,6 +1,6 @@
 import { ContactSection } from '@/components/contact-section';
 import { ProjectDrawer } from '@/components/project-drawer';
-import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, projects, type Project } from '@/data/projects';
+import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, featuredProjects, type Project } from '@/data/projects';
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { useActiveNav } from '@/contexts/active-nav-context';
@@ -456,7 +456,7 @@ export default function Home() {
                         </div>
 
                         <div className="projects-cards-container flex gap-5 md:gap-10 shrink-0">
-                        {projects.slice(0, 4).map((project, i) => (
+                        {featuredProjects.map((project, i) => (
                             <button
                                 key={i}
                                 type="button"
