@@ -5,7 +5,7 @@ import { MorphWordIn } from '@/components/morph-word-in';
 import { subscribe } from '@/routes/newsletter';
 import { Check, Copy } from 'lucide-react';
 import gsap from 'gsap';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const CONTACT_EMAIL = 'jacob@tinston.dev';
 const SUBSCRIBED_DURATION_MS = 4000;
@@ -49,6 +49,13 @@ export function ContactSection({
     const [subscribing, setSubscribing] = useState(false);
     const [subscribeError, setSubscribeError] = useState<string | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
+
+    useLayoutEffect(() => {
+        if (!standalone || !sectionRef.current) return;
+        const el = sectionRef.current;
+        gsap.set([el.querySelector('.contact-intro'), el.querySelector('.contact-newsletter'), el.querySelector('.contact-socials')], { opacity: 0, y: 24 });
+        gsap.set(el.querySelectorAll('.contact-intro .word'), { yPercent: 120 });
+    }, [standalone]);
 
     useEffect(() => {
         if (!standalone || !sectionRef.current) return;

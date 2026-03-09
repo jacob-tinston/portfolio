@@ -7,6 +7,11 @@ Route::inertia('/projects', 'projects')->name('projects');
 Route::inertia('/now', 'now')->name('now');
 Route::inertia('/contact', 'contact')->name('contact');
 
+Route::get('/sitemap.xml', App\Http\Controllers\SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', fn () => response(
+    "User-agent: *\nDisallow:\n\nSitemap: ".route('sitemap'),
+    200,
+)->header('Content-Type', 'text/plain'));
 Route::post('/newsletter', App\Http\Controllers\NewsletterSubscribeController::class)->name('newsletter.subscribe');
 
 Route::middleware(['auth', 'verified'])->group(function () {

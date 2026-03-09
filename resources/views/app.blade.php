@@ -33,6 +33,27 @@
 
         <title inertia>{{ config('app.name', 'Jacob Tinston | Software & AI Engineer') }}</title>
 
+        {{-- SEO --}}
+        <meta name="description" content="I'm a self-taught software and AI engineer building thoughtful, end-to-end products.">
+        <meta name="author" content="Jacob Tinston">
+        <link rel="canonical" href="{{ url()->current() }}">
+
+        {{-- Open Graph --}}
+        <meta property="og:site_name" content="Jacob Tinston">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:title" content="{{ config('app.name', 'Jacob Tinston | Software & AI Engineer') }}">
+        <meta property="og:description" content="I'm a self-taught software and AI engineer building thoughtful, end-to-end products.">
+        <meta property="og:image" content="{{ url('/logo.png') }}">
+        <meta property="og:image:alt" content="Jacob Tinston">
+        <meta property="og:locale" content="en_GB">
+
+        {{-- Twitter / X --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ config('app.name', 'Jacob Tinston | Software & AI Engineer') }}">
+        <meta name="twitter:description" content="I'm a self-taught software and AI engineer building thoughtful, end-to-end products.">
+        <meta name="twitter:image" content="{{ url('/logo.png') }}">
+
         <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 

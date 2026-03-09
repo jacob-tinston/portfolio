@@ -61,7 +61,7 @@ export default function CursorGlyphs() {
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        if ('ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches) {
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             return;
         }
 
@@ -85,7 +85,13 @@ export default function CursorGlyphs() {
             const dpr = window.devicePixelRatio || 1;
             canvas.width = window.innerWidth * dpr;
             canvas.height = window.innerHeight * dpr;
-            context.scale(dpr, dpr);
+            // Setting canvas dimensions resets the context transform, so always use
+            // setTransform (not scale) to avoid accumulation across multiple resize calls.
+            context.setTransform(dpr, 0, 0, dpr, 0, 0);
+            // Re-apply invariant context state after reset
+            context.font = `${CONFIG.fontSize}px ${CONFIG.font}`;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
         }
 
         resize();
@@ -122,14 +128,10 @@ export default function CursorGlyphs() {
         }
 
         function animate() {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            context.clearRect(0, 0, w, h);
+            context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-            context.font = `${CONFIG.fontSize}px ${CONFIG.font}`;
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-
+            // Read isDark once per frame rather than once per particle
+            const isDark = document.documentElement.classList.contains('dark');
             const mouseX = mouseRef.current.x;
             const mouseY = mouseRef.current.y;
 
@@ -146,10 +148,7 @@ export default function CursorGlyphs() {
                 const dx = p.x - mouseX;
                 const dy = p.y - mouseY;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                const distFactor = Math.pow(
-                    Math.max(0, 1 - dist / CONFIG.fadeRadius),
-                    1.0,
-                );
+                const distFactor = Math.max(0, 1 - dist / CONFIG.fadeRadius);
 
                 if (distFactor < 0.01) {
                     delete occupied[p.key];
@@ -161,7 +160,6 @@ export default function CursorGlyphs() {
                 const alpha =
                     (1 - progress * progress) * CONFIG.maxOpacity * distFactor;
 
-                const isDark = document.documentElement.classList.contains('dark');
                 context.fillStyle = getColor(progress, isDark);
                 context.globalAlpha = alpha;
                 context.fillText(p.char, p.x, p.y);

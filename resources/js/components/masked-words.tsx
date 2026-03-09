@@ -51,7 +51,7 @@ export function MaskedWords({
                     word
                 );
                 return (
-                    <span key={i} className="inline-flex overflow-hidden" aria-hidden="true">
+                    <span key={i} className="inline-block [overflow:clip]" aria-hidden="true">
                         <span className="word inline-block">
                             {content}
                             {i < words.length - 1 ? '\u00A0' : ''}

@@ -64,6 +64,7 @@ const FooterTinston = forwardRef<HTMLElement>(function FooterTinston(_, ref) {
                 alt=""
                 className="w-full object-contain object-bottom brightness-0 dark:invert"
                 style={{ marginBottom: '-0.35%' }}
+                loading="lazy"
                 aria-hidden
             />
         </footer>
@@ -325,13 +326,11 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
                     },
                 },
             );
-            requestAnimationFrame(() => {
-                ScrollTrigger.refresh();
-                const rect = footer.getBoundingClientRect();
-                if (rect.top < window.innerHeight * 0.95) {
-                    footerTweenRef.current?.play(0);
-                }
-            });
+            // If footer already in view on load, play immediately
+            const rect = footer.getBoundingClientRect();
+            if (rect.top < window.innerHeight * 0.95) {
+                footerTweenRef.current?.play(0);
+            }
         });
         return () => {
             cancelAnimationFrame(id);

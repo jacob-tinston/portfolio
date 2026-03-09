@@ -417,6 +417,7 @@ export default function Home() {
                                         src="/images/headshot.png"
                                         alt="Jacob"
                                         className="h-full w-full object-cover"
+                                        fetchPriority="high"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
                                         }}

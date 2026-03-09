@@ -11,7 +11,7 @@ import { Head } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,37 +31,34 @@ export default function Projects() {
         start + PROJECTS_PER_PAGE,
     );
 
+    // Hide above-fold elements before first paint so they never flash at full
+    // opacity before GSAP's useEffect fires.
+    useLayoutEffect(() => {
+        gsap.set(['.page-title', '.page-intro'], { opacity: 0, y: 24 });
+        gsap.set('.page-intro .word', { yPercent: 120 });
+        gsap.set('.project-card', { opacity: 0, y: 28 });
+    }, []);
+
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from('.page-title', {
-                y: 24,
-                opacity: 0,
-                duration: 0.55,
-                delay: 0.1,
-                ease: 'power2.out',
-            });
-            gsap.from('.page-intro', {
-                y: 24,
-                opacity: 0,
-                duration: 0.55,
-                delay: 0.2,
-                ease: 'power2.out',
-            });
-            gsap.from('.page-intro .word', {
-                yPercent: 120,
-                stagger: 0.04,
-                duration: 0.6,
-                delay: 0.45,
-                ease: 'power2.out',
-            });
-            gsap.from('.project-card', {
-                y: 28,
-                opacity: 0,
-                stagger: 0.08,
-                duration: 0.6,
-                delay: 0.5,
-                ease: 'power2.out',
-            });
+            // Use fromTo so "to" values are explicit and not captured from the
+            // gsap.set state above.
+            gsap.fromTo('.page-title',
+                { y: 24, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.55, delay: 0.1, ease: 'power2.out' },
+            );
+            gsap.fromTo('.page-intro',
+                { y: 24, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.55, delay: 0.2, ease: 'power2.out' },
+            );
+            gsap.fromTo('.page-intro .word',
+                { yPercent: 120 },
+                { yPercent: 0, stagger: 0.04, duration: 0.6, delay: 0.45, ease: 'power2.out' },
+            );
+            gsap.fromTo('.project-card',
+                { y: 28, opacity: 0 },
+                { y: 0, opacity: 1, stagger: 0.08, duration: 0.6, delay: 0.5, ease: 'power2.out' },
+            );
         }, containerRef);
 
         return () => ctx.revert();

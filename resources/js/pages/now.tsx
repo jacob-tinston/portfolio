@@ -3,7 +3,7 @@ import { MorphWordIn } from '@/components/morph-word-in';
 import { Head } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,37 +16,30 @@ const nowItems = [
 export default function Now() {
     const containerRef = useRef<HTMLDivElement>(null);
 
+    useLayoutEffect(() => {
+        gsap.set(['.page-title', '.page-subtext'], { opacity: 0 });
+        gsap.set('.page-subtext .word', { yPercent: 120 });
+        gsap.set('.now-item', { opacity: 0, y: 14 });
+    }, []);
+
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from('.page-title', {
-                y: 20,
-                opacity: 0,
-                duration: 0.5,
-                delay: 0.1,
-                ease: 'power2.out',
-            });
-            gsap.from('.page-subtext', {
-                y: 12,
-                opacity: 0,
-                duration: 0.5,
-                delay: 0.2,
-                ease: 'power2.out',
-            });
-            gsap.from('.page-subtext .word', {
-                yPercent: 120,
-                stagger: 0.03,
-                duration: 0.5,
-                delay: 0.35,
-                ease: 'power2.out',
-            });
-            gsap.from('.now-item', {
-                y: 14,
-                opacity: 0,
-                stagger: 0.06,
-                duration: 0.5,
-                delay: 0.38,
-                ease: 'power2.out',
-            });
+            gsap.fromTo('.page-title',
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.5, delay: 0.1, ease: 'power2.out' },
+            );
+            gsap.fromTo('.page-subtext',
+                { y: 12, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: 'power2.out' },
+            );
+            gsap.fromTo('.page-subtext .word',
+                { yPercent: 120 },
+                { yPercent: 0, stagger: 0.03, duration: 0.5, delay: 0.35, ease: 'power2.out' },
+            );
+            gsap.fromTo('.now-item',
+                { y: 14, opacity: 0 },
+                { y: 0, opacity: 1, stagger: 0.06, duration: 0.5, delay: 0.38, ease: 'power2.out' },
+            );
         }, containerRef);
 
         return () => ctx.revert();
