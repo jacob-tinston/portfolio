@@ -392,7 +392,7 @@ export default function Home() {
 
     return (
         <>
-            <Head title="Jacob Tinston | Software & AI Engineer" />
+            <Head />
             <div ref={containerRef}>
                 {/* ── Hero (above About) ── */}
                 <section className="px-6 pt-28 pb-4 sm:pt-36">
