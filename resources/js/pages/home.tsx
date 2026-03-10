@@ -1,6 +1,7 @@
 import { ContactSection } from '@/components/contact-section';
 import { ProjectDrawer } from '@/components/project-drawer';
 import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, featuredProjects, type Project } from '@/data/projects';
+import { latestThoughts } from '@/data/thoughts';
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { useActiveNav } from '@/contexts/active-nav-context';
@@ -624,7 +625,7 @@ export default function Home() {
                                 <h2 className="font-title text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
                                     <MorphWordIn>Thoughts</MorphWordIn>
                                 </h2>
-                                <div className="hidden">
+                                {latestThoughts.length > 0 && (
                                     <Link
                                         href="/thoughts"
                                         className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
@@ -632,15 +633,42 @@ export default function Home() {
                                         All posts
                                         <span aria-hidden>→</span>
                                     </Link>
-                                </div>
+                                )}
                             </div>
                             <p className="mb-8 text-lg leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
                                 <MaskedWords>Sometimes I write about things I'm thinking about. Some are quick thoughts, some turn into longer posts.</MaskedWords>
                             </p>
 
-                            <p className="text-sm leading-relaxed text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
-                                Nothing here yet.
-                            </p>
+                            {latestThoughts.length === 0 ? (
+                                <p className="text-sm leading-relaxed text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
+                                    Nothing here yet.
+                                </p>
+                            ) : (
+                                <div className="space-y-px divide-y divide-[#1b1b18]/[0.06] dark:divide-[#EDEDEC]/[0.06]">
+                                    {latestThoughts.map((thought) => (
+                                        <Link
+                                            key={thought.slug}
+                                            href={`/thoughts/${thought.slug}`}
+                                            className="group flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-medium text-[#1b1b18] dark:text-[#EDEDEC] md:text-base">
+                                                    {thought.title}
+                                                </p>
+                                                <p className="mt-0.5 font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
+                                                    {thought.date}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className="shrink-0 text-[#1b1b18]/30 transition-transform group-hover:translate-x-0.5 dark:text-[#EDEDEC]/30"
+                                                aria-hidden
+                                            >
+                                                →
+                                            </span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>

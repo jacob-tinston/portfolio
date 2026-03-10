@@ -6,6 +6,8 @@ Route::inertia('/', 'home')->name('home');
 Route::inertia('/projects', 'projects')->name('projects');
 Route::inertia('/now', 'now')->name('now');
 Route::inertia('/contact', 'contact')->name('contact');
+Route::inertia('/thoughts', 'thoughts')->name('thoughts');
+Route::get('/thoughts/{slug}', fn (string $slug) => inertia('thoughts/show', ['slug' => $slug]))->name('thoughts.show');
 
 Route::get('/sitemap.xml', App\Http\Controllers\SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', fn () => response(
