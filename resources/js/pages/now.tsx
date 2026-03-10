@@ -65,7 +65,7 @@ export default function Now() {
                                 ]}
                                 linkClassName="underline decoration-[#1b1b18]/30 underline-offset-2 transition-colors hover:decoration-[#1b1b18]/60 dark:decoration-[#EDEDEC]/30 dark:hover:decoration-[#EDEDEC]/60"
                             >
-                                This is my /now page. It's where I keep track of what I'm currently working on, learning and thinking about.
+                                This is my /now page. It's where I keep track of what I'm currently working on, learning and thinking about, as of March 2026.
                             </MaskedWords>
                         </p>
                     </header>
