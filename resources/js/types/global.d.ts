@@ -1,3 +1,4 @@
+import type { Project } from '@/data/projects';
 import type { Auth } from '@/types/auth';
 
 declare module '@inertiajs/core' {
@@ -6,6 +7,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            publicProjects: Project[];
             [key: string]: unknown;
         };
     }

@@ -1,11 +1,11 @@
 import { ContactSection } from '@/components/contact-section';
 import { ProjectDrawer } from '@/components/project-drawer';
-import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, featuredProjects, type Project } from '@/data/projects';
+import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, type Project } from '@/data/projects';
 import { latestThoughts } from '@/data/thoughts';
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { useActiveNav } from '@/contexts/active-nav-context';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 
 
 import gsap from 'gsap';
@@ -155,6 +155,9 @@ function MorphWord() {
 
 export default function Home() {
     const { setActiveNav } = useActiveNav();
+    const { featuredProjects = [] } = usePage<{
+        featuredProjects?: Project[];
+    }>().props;
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const openProject = useCallback((project: Project) => setSelectedProject(project), []);

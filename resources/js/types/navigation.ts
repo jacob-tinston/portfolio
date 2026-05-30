@@ -11,4 +11,6 @@ export type NavItem = {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    /** When true, treat child paths as active (e.g. /content matches /content/projects). */
+    matchPrefix?: boolean;
 };

@@ -1,13 +1,8 @@
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
 import { ProjectDrawer } from '@/components/project-drawer';
-import {
-    PROJECTS_ARCHIVE_INTRO,
-    PROJECTS_INTRO,
-    projects,
-    type Project,
-} from '@/data/projects';
-import { Head } from '@inertiajs/react';
+import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, type Project } from '@/data/projects';
+import { Head, usePage } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -19,6 +14,7 @@ const PROJECTS_PER_PAGE = 6;
 
 export default function Projects() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const { projects = [] } = usePage<{ projects?: Project[] }>().props;
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const openProject = useCallback((project: Project) => setSelectedProject(project), []);

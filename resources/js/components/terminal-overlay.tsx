@@ -1,7 +1,8 @@
 'use client';
 
-import { projects } from '@/data/projects';
+import type { Project } from '@/data/projects';
 import { useAppearance } from '@/hooks/use-appearance';
+import { usePage } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 type LineType = 'command' | 'output' | 'error' | 'success' | 'blank';
@@ -85,6 +86,7 @@ export function TerminalOverlay({
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const { resolvedAppearance, updateAppearance } = useAppearance();
+    const { publicProjects = [] } = usePage<{ publicProjects?: Project[] }>().props;
     const inputRef = useRef<HTMLInputElement>(null);
     const outputRef = useRef<HTMLDivElement>(null);
 
@@ -167,11 +169,17 @@ export function TerminalOverlay({
                 case 'projects':
                     addLines({ type: 'output', text: 'Projects:' });
                     addLines({ type: 'blank', text: '' });
-                    projects.forEach((p, i) => {
+                    if (publicProjects.length === 0) {
+                        addLines({ type: 'output', text: '  No published projects yet.' });
+                        break;
+                    }
+                    publicProjects.forEach((p, i) => {
                         addLines({ type: 'output', text: `  ${i + 1}. ${p.title}` });
                         addLines({ type: 'output', text: `     ${p.description}` });
                         addLines({ type: 'output', text: `     [${p.tags.join(', ')}]` });
-                        if (i < projects.length - 1) addLines({ type: 'blank', text: '' });
+                        if (i < publicProjects.length - 1) {
+                            addLines({ type: 'blank', text: '' });
+                        }
                     });
                     break;
                 case 'now':
@@ -212,7 +220,7 @@ export function TerminalOverlay({
 
             addLines({ type: 'blank', text: '' });
         },
-        [addLines, onClose, resolvedAppearance, updateAppearance],
+        [addLines, onClose, publicProjects, resolvedAppearance, updateAppearance],
     );
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
