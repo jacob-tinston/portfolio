@@ -1,15 +1,22 @@
-import { MaskedWords } from '@/components/masked-words';
-import { MorphWordIn } from '@/components/morph-word-in';
-import { THOUGHTS_INTRO, thoughts } from '@/data/thoughts';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import ThoughtsController from '@/actions/App/Http/Controllers/ThoughtsController';
+import { MaskedWords } from '@/components/masked-words';
+import { MorphWordIn } from '@/components/morph-word-in';
+import { THOUGHTS_INTRO  } from '@/data/thoughts';
+import type {PublicThoughtListItem} from '@/data/thoughts';
 
 gsap.registerPlugin(ScrollTrigger);
 
+type ThoughtsPageProps = {
+    thoughts?: PublicThoughtListItem[];
+};
+
 export default function Thoughts() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const { thoughts: thoughtRows = [] } = usePage<ThoughtsPageProps>().props;
 
     useLayoutEffect(() => {
         gsap.set(['.page-title', '.page-intro', '.thoughts-card'], { opacity: 0, y: 24 });
@@ -41,7 +48,7 @@ export default function Thoughts() {
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [thoughtRows.length]);
 
     return (
         <>
@@ -55,16 +62,16 @@ export default function Thoughts() {
                         <MaskedWords>{THOUGHTS_INTRO}</MaskedWords>
                     </p>
 
-                    {thoughts.length === 0 ? (
+                    {thoughtRows.length === 0 ? (
                         <p className="thoughts-card text-sm text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
                             Nothing here yet.
                         </p>
                     ) : (
                         <div className="thoughts-card divide-y divide-[#1b1b18]/[0.06] dark:divide-[#EDEDEC]/[0.06]">
-                            {thoughts.map((thought) => (
+                            {thoughtRows.map((thought) => (
                                 <Link
                                     key={thought.slug}
-                                    href={`/thoughts/${thought.slug}`}
+                                    href={ThoughtsController.show.url(thought.slug)}
                                     className="group flex items-center justify-between gap-4 py-5 first:pt-0 last:pb-0"
                                 >
                                     <div className="min-w-0">

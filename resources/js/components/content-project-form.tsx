@@ -1,4 +1,9 @@
+import { Link, useForm } from '@inertiajs/react';
+import { useEffect, useId, useMemo } from 'react';
+
 import ContentProjectController from '@/actions/App/Http/Controllers/Content/ContentProjectController';
+import { AdminDraftPublishedToggle } from '@/components/admin-draft-published-toggle';
+import { AdminFormSection } from '@/components/admin-form-section';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,8 +13,6 @@ import { cn } from '@/lib/utils';
 import { content, dashboard } from '@/routes';
 import { projects } from '@/routes/content';
 import type { BreadcrumbItem } from '@/types';
-import { Link, useForm } from '@inertiajs/react';
-import { useEffect, useId, useState, type ReactNode } from 'react';
 
 const CONTENT_PROJECT_FORM_ID = 'content-project-form';
 
@@ -36,25 +39,8 @@ type ContentProjectFormProps = {
     heading: string;
 };
 
-function FieldGroupTitle({ children }: { children: ReactNode }) {
-    return (
-        <h2
-            className={cn(
-                'rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-widest',
-                'bg-neutral-200 text-[#1b1b18]',
-                'dark:bg-[#141414] dark:text-[#EDEDEC]',
-            )}
-        >
-            {children}
-        </h2>
-    );
-}
-
 function ContentProjectFormInner({ mode, project, status, heading }: ContentProjectFormProps) {
     const baseId = useId();
-    const [coverPreview, setCoverPreview] = useState<string | null>(
-        mode === 'edit' && project ? project.image : null,
-    );
 
     const form = useForm({
         title: project?.title ?? '',
@@ -72,22 +58,23 @@ function ContentProjectFormInner({ mode, project, status, heading }: ContentProj
         image: null as File | null,
     });
 
-    useEffect(() => {
+    const objectUrl = useMemo(() => {
         if (form.data.image instanceof File) {
-            const url = URL.createObjectURL(form.data.image);
-            setCoverPreview(url);
-
-            return () => {
-                URL.revokeObjectURL(url);
-            };
+            return URL.createObjectURL(form.data.image);
         }
 
-        if (mode === 'edit' && project) {
-            setCoverPreview(project.image);
-        } else {
-            setCoverPreview(null);
-        }
-    }, [form.data.image, mode, project]);
+        return null;
+    }, [form.data.image]);
+
+    useEffect(() => {
+        return () => {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+        };
+    }, [objectUrl]);
+
+    const coverPreview = objectUrl ?? (mode === 'edit' && project ? project.image : null);
 
     const submitLabel =
         mode === 'create'
@@ -141,7 +128,7 @@ function ContentProjectFormInner({ mode, project, status, heading }: ContentProj
                 }}
             >
                 <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain">
-                    <div className="flex w-full flex-col gap-8 p-4 pb-10 md:p-6 md:pb-12 lg:px-8">
+                    <div className="flex w-full flex-col gap-6 p-4 pb-10 md:gap-8 md:p-6 md:pb-12 lg:px-8">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <h1 className="text-2xl font-semibold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">
                                 {heading}
@@ -160,128 +147,128 @@ function ContentProjectFormInner({ mode, project, status, heading }: ContentProj
                             </div>
                         </div>
 
-                        <section className="flex flex-col gap-3">
-                            <FieldGroupTitle>Basics</FieldGroupTitle>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-title`}>Title</Label>
-                                <Input
-                                    id={`${baseId}-title`}
-                                    value={form.data.title}
-                                    onChange={(e) => form.setData('title', e.target.value)}
-                                    required
-                                    autoComplete="off"
-                                />
-                                <InputError message={form.errors.title} />
+                        <AdminFormSection
+                            title="Basics"
+                            description="Title, body copy, and tags shown on the public projects page."
+                        >
+                            <div className="grid min-w-0 gap-4">
+                                <div className="grid min-w-0 gap-2">
+                                    <Label htmlFor={`${baseId}-title`}>Title</Label>
+                                    <Input
+                                        id={`${baseId}-title`}
+                                        value={form.data.title}
+                                        onChange={(e) => form.setData('title', e.target.value)}
+                                        required
+                                        autoComplete="off"
+                                    />
+                                    <InputError message={form.errors.title} />
+                                </div>
+                                <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+                                    <div className="grid min-w-0 flex-1 gap-2">
+                                        <Label htmlFor={`${baseId}-description`}>Description</Label>
+                                        <textarea
+                                            id={`${baseId}-description`}
+                                            value={form.data.description}
+                                            onChange={(e) => form.setData('description', e.target.value)}
+                                            required
+                                            rows={8}
+                                            className={cn(
+                                                'border-input placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground w-full min-w-0 rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none md:text-sm',
+                                                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                                                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                                                'min-h-[160px] resize-y',
+                                            )}
+                                        />
+                                        <InputError message={form.errors.description} />
+                                    </div>
+                                    <div className="grid w-full shrink-0 gap-2 lg:max-w-xs lg:pt-0">
+                                        <Label htmlFor={`${baseId}-tags`}>Tags</Label>
+                                        <p className="text-muted-foreground -mt-1 text-xs">Comma-separated</p>
+                                        <Input
+                                            id={`${baseId}-tags`}
+                                            value={form.data.tags}
+                                            onChange={(e) => form.setData('tags', e.target.value)}
+                                            placeholder="AI, Laravel, Mobile"
+                                        />
+                                        <InputError message={form.errors.tags} />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-description`}>Description</Label>
-                                <textarea
-                                    id={`${baseId}-description`}
-                                    value={form.data.description}
-                                    onChange={(e) => form.setData('description', e.target.value)}
-                                    required
-                                    rows={8}
-                                    className={cn(
-                                        'border-input placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground w-full min-w-0 rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none md:text-sm',
-                                        'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                                        'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-                                        'min-h-[160px] resize-y',
-                                    )}
-                                />
-                                <InputError message={form.errors.description} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-tags`}>Tags (comma-separated)</Label>
-                                <Input
-                                    id={`${baseId}-tags`}
-                                    value={form.data.tags}
-                                    onChange={(e) => form.setData('tags', e.target.value)}
-                                    placeholder="AI, Laravel, Mobile"
-                                />
-                                <InputError message={form.errors.tags} />
-                            </div>
-                        </section>
+                        </AdminFormSection>
 
-                        <section className="flex flex-col gap-3">
-                            <FieldGroupTitle>Cover image</FieldGroupTitle>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-image`}>
-                                    {mode === 'create' ? 'Image file' : 'Replace image (optional)'}
-                                </Label>
-                                <Input
-                                    id={`${baseId}-image`}
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => form.setData('image', e.target.files?.[0] ?? null)}
-                                    required={mode === 'create'}
-                                />
-                                <InputError message={form.errors.image} />
+                        <AdminFormSection
+                            title="Cover image"
+                            description="Used as the project card thumbnail on the site."
+                        >
+                            <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:gap-6">
+                                <div className="grid min-w-0 flex-1 gap-2">
+                                    <Label htmlFor={`${baseId}-image`}>
+                                        {mode === 'create' ? 'Image file' : 'Replace image (optional)'}
+                                    </Label>
+                                    <Input
+                                        id={`${baseId}-image`}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => form.setData('image', e.target.files?.[0] ?? null)}
+                                        required={mode === 'create'}
+                                    />
+                                    <InputError message={form.errors.image} />
+                                </div>
                                 {coverPreview ? (
-                                    <div className="mt-2 overflow-hidden rounded-lg border border-border/80 bg-muted/30">
+                                    <div className="w-full shrink-0 overflow-hidden rounded-lg border border-border/80 bg-muted/30 md:max-w-[280px]">
                                         <img
                                             src={coverPreview}
                                             alt=""
-                                            className="max-h-48 w-full object-contain object-left"
+                                            className="max-h-48 w-full object-contain object-left md:max-h-56"
                                         />
                                     </div>
-                                ) : null}
+                                ) : (
+                                    <div className="text-muted-foreground hidden text-sm md:block md:w-[280px] md:shrink-0 md:rounded-lg md:border md:border-dashed md:border-border/60 md:p-4 md:text-center">
+                                        Preview appears after you choose a file.
+                                    </div>
+                                )}
                             </div>
-                        </section>
+                        </AdminFormSection>
 
-                        <section className="flex flex-col gap-3">
-                            <FieldGroupTitle>Links</FieldGroupTitle>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-website`}>Website URL</Label>
-                                <Input
-                                    id={`${baseId}-website`}
-                                    type="url"
-                                    value={form.data.website_url}
-                                    onChange={(e) => form.setData('website_url', e.target.value)}
-                                    placeholder="https://"
-                                />
-                                <InputError message={form.errors.website_url} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-app-store`}>App Store URL</Label>
-                                <Input
-                                    id={`${baseId}-app-store`}
-                                    type="url"
-                                    value={form.data.app_store_url}
-                                    onChange={(e) => form.setData('app_store_url', e.target.value)}
-                                    placeholder="https://apps.apple.com/…"
-                                />
-                                <InputError message={form.errors.app_store_url} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`${baseId}-play-store`}>Play Store URL</Label>
-                                <Input
-                                    id={`${baseId}-play-store`}
-                                    type="url"
-                                    value={form.data.play_store_url}
-                                    onChange={(e) => form.setData('play_store_url', e.target.value)}
-                                    placeholder="https://play.google.com/…"
-                                />
-                                <InputError message={form.errors.play_store_url} />
-                            </div>
-                        </section>
-
-                        <section className="flex flex-col gap-3">
-                            <FieldGroupTitle>Visibility</FieldGroupTitle>
-                            <div className="flex items-start gap-3">
-                                <Checkbox
-                                    id={`${baseId}-published`}
-                                    checked={form.data.is_published}
-                                    onCheckedChange={(v) => form.setData('is_published', v === true)}
-                                />
-                                <div className="grid gap-1">
-                                    <Label htmlFor={`${baseId}-published`} className="cursor-pointer font-medium">
-                                        Published
-                                    </Label>
-                                    <p className="text-muted-foreground text-sm">
-                                        When off, the project stays a draft and is hidden from the public projects page.
-                                    </p>
+                        <AdminFormSection title="Links" description="Optional storefront and web URLs.">
+                            <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                <div className="grid min-w-0 gap-2 md:col-span-2 xl:col-span-1">
+                                    <Label htmlFor={`${baseId}-website`}>Website</Label>
+                                    <Input
+                                        id={`${baseId}-website`}
+                                        type="url"
+                                        value={form.data.website_url}
+                                        onChange={(e) => form.setData('website_url', e.target.value)}
+                                        placeholder="https://"
+                                    />
+                                    <InputError message={form.errors.website_url} />
+                                </div>
+                                <div className="grid min-w-0 gap-2">
+                                    <Label htmlFor={`${baseId}-app-store`}>App Store</Label>
+                                    <Input
+                                        id={`${baseId}-app-store`}
+                                        type="url"
+                                        value={form.data.app_store_url}
+                                        onChange={(e) => form.setData('app_store_url', e.target.value)}
+                                        placeholder="https://apps.apple.com/…"
+                                    />
+                                    <InputError message={form.errors.app_store_url} />
+                                </div>
+                                <div className="grid min-w-0 gap-2">
+                                    <Label htmlFor={`${baseId}-play-store`}>Play Store</Label>
+                                    <Input
+                                        id={`${baseId}-play-store`}
+                                        type="url"
+                                        value={form.data.play_store_url}
+                                        onChange={(e) => form.setData('play_store_url', e.target.value)}
+                                        placeholder="https://play.google.com/…"
+                                    />
+                                    <InputError message={form.errors.play_store_url} />
                                 </div>
                             </div>
+                        </AdminFormSection>
+
+                        <AdminFormSection title="Visibility" description="Homepage slider; publishing is set in the bar below.">
                             <div className="flex items-start gap-3">
                                 <Checkbox
                                     id={`${baseId}-featured-toggle`}
@@ -324,7 +311,7 @@ function ContentProjectFormInner({ mode, project, status, heading }: ContentProj
                                     <InputError message={form.errors.featured_order} />
                                 </div>
                             ) : null}
-                        </section>
+                        </AdminFormSection>
                     </div>
                 </div>
 
@@ -337,16 +324,23 @@ function ContentProjectFormInner({ mode, project, status, heading }: ContentProj
                         'px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-6 lg:px-8',
                     )}
                 >
-                    <div className="mx-auto flex w-full max-w-none min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mx-auto flex w-full max-w-none min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-muted-foreground text-sm">{statusMessage}</p>
-                        <Button
-                            form={CONTENT_PROJECT_FORM_ID}
-                            type="submit"
-                            disabled={form.processing}
-                            className="sm:shrink-0"
-                        >
-                            {submitLabel}
-                        </Button>
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-3">
+                            <AdminDraftPublishedToggle
+                                published={form.data.is_published}
+                                onPublishedChange={(v) => form.setData('is_published', v)}
+                                disabled={form.processing}
+                            />
+                            <Button
+                                form={CONTENT_PROJECT_FORM_ID}
+                                type="submit"
+                                disabled={form.processing}
+                                className="sm:shrink-0"
+                            >
+                                {submitLabel}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </form>

@@ -20,6 +20,11 @@ test('authenticated users can open content manage stubs', function () {
     $this->get(route('content.projects'))->assertOk()->assertInertia(
         fn ($page) => $page->component('content/projects/index'),
     );
-    $this->get(route('content.books'))->assertOk();
+    $this->get(route('content.books'))->assertOk()->assertInertia(
+        fn ($page) => $page->component('content/books/index'),
+    );
     $this->get(route('content.now'))->assertOk();
+    $this->get(route('content.thoughts'))->assertOk()->assertInertia(
+        fn ($page) => $page->component('content/thoughts/index'),
+    );
 });

@@ -1,23 +1,33 @@
-import { MorphWordIn } from '@/components/morph-word-in';
-import { thoughts } from '@/data/thoughts';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import ThoughtsController from '@/actions/App/Http/Controllers/ThoughtsController';
+import { MorphWordIn } from '@/components/morph-word-in';
+import { MARKDOWN_BODY_CLASS } from '@/lib/markdown-body-class';
+import { cn } from '@/lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface Props {
+type ThoughtShowPayload = {
     slug: string;
-}
+    title: string;
+    date: string;
+    tags: string[];
+    body_html: string;
+};
 
-export default function ThoughtShow({ slug }: Props) {
-    const thought = thoughts.find((t) => t.slug === slug);
+type ThoughtShowPageProps = {
+    thought: ThoughtShowPayload;
+};
+
+export default function ThoughtShow() {
+    const { thought } = usePage<ThoughtShowPageProps>().props;
     const containerRef = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
         gsap.set(['.page-title', '.page-meta', '.page-back'], { opacity: 0 });
-        gsap.set('.post-paragraph', { opacity: 0, y: 14 });
+        gsap.set('.thought-body', { opacity: 0, y: 14 });
     }, []);
 
     useEffect(() => {
@@ -38,33 +48,14 @@ export default function ThoughtShow({ slug }: Props) {
                 { y: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: 'power2.out' },
             );
             gsap.fromTo(
-                '.post-paragraph',
+                '.thought-body',
                 { y: 14, opacity: 0 },
-                { y: 0, opacity: 1, stagger: 0.07, duration: 0.5, delay: 0.3, ease: 'power2.out' },
+                { y: 0, opacity: 1, duration: 0.5, delay: 0.3, ease: 'power2.out' },
             );
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
-
-    if (!thought) {
-        return (
-            <>
-                <Head title="Not Found" />
-                <div className="pt-36 pb-24">
-                    <div className="mx-auto max-w-[700px] px-6">
-                        <p className="text-[#1b1b18]/50 dark:text-[#EDEDEC]/50">Post not found.</p>
-                        <Link
-                            href="/thoughts"
-                            className="mt-4 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-[#1b1b18]/40 transition-colors hover:text-[#1b1b18]/70 dark:text-[#EDEDEC]/40 dark:hover:text-[#EDEDEC]/70"
-                        >
-                            ← Thoughts
-                        </Link>
-                    </div>
-                </div>
-            </>
-        );
-    }
+    }, [thought.slug]);
 
     return (
         <>
@@ -72,7 +63,7 @@ export default function ThoughtShow({ slug }: Props) {
             <div ref={containerRef} className="pt-36 pb-24">
                 <div className="mx-auto max-w-[700px] px-6">
                     <Link
-                        href="/thoughts"
+                        href={ThoughtsController.index.url()}
                         className="page-back mb-10 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-[#1b1b18]/40 transition-colors hover:text-[#1b1b18]/70 dark:text-[#EDEDEC]/40 dark:hover:text-[#EDEDEC]/70"
                     >
                         ← Thoughts
@@ -86,7 +77,7 @@ export default function ThoughtShow({ slug }: Props) {
                             <span className="font-mono text-xs uppercase tracking-widest text-[#1b1b18]/40 dark:text-[#EDEDEC]/40">
                                 {thought.date}
                             </span>
-                            {thought.tags?.map((tag) => (
+                            {thought.tags.map((tag) => (
                                 <span
                                     key={tag}
                                     className="rounded-full border border-[#1b1b18]/10 bg-[#1b1b18]/[0.03] px-3 py-1 font-mono text-xs text-[#1b1b18]/50 dark:border-[#EDEDEC]/10 dark:bg-[#EDEDEC]/[0.04] dark:text-[#EDEDEC]/40"
@@ -97,16 +88,10 @@ export default function ThoughtShow({ slug }: Props) {
                         </div>
                     </header>
 
-                    <div className="space-y-6">
-                        {thought.content.map((paragraph, i) => (
-                            <p
-                                key={i}
-                                className="post-paragraph text-base leading-relaxed text-[#1b1b18] dark:text-[#EDEDEC] md:text-lg"
-                            >
-                                {paragraph}
-                            </p>
-                        ))}
-                    </div>
+                    <div
+                        className={cn(MARKDOWN_BODY_CLASS, 'thought-body')}
+                        dangerouslySetInnerHTML={{ __html: thought.body_html }}
+                    />
                 </div>
             </div>
         </>

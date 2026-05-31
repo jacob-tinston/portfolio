@@ -79,9 +79,18 @@ function getPathname(url: string): string {
     }
 }
 
+function pathToNavSection(pathname: string): string {
+    if (pathname === '/') {
+        return 'about';
+    }
+    const trimmed = pathname.replace(/^\/+/, '');
+    const first = trimmed.split('/')[0];
+
+    return first && first.length > 0 ? first : 'about';
+}
+
 function getInitialActive(pathname: string): string {
-    if (pathname === '/') return 'about';
-    return pathname.slice(1) || 'about';
+    return pathToNavSection(pathname);
 }
 
 function NavLinks({
@@ -259,9 +268,14 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
     const footerTweenRef = useRef<gsap.core.Tween | null>(null);
 
     useEffect(() => {
-        if (pathname !== '/') {
-            setActiveNav(pathname.slice(1) || 'about');
+        if (pathname === '/') {
+            return;
         }
+        const id = requestAnimationFrame(() => {
+            setActiveNav(pathToNavSection(pathname));
+        });
+
+        return () => cancelAnimationFrame(id);
     }, [pathname]);
 
     // When navigating to home with a hash (e.g. /#contact), scroll to section once Lenis is ready

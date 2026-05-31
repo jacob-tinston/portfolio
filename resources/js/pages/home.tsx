@@ -1,31 +1,59 @@
-import { ContactSection } from '@/components/contact-section';
-import { ProjectDrawer } from '@/components/project-drawer';
-import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO, type Project } from '@/data/projects';
-import { latestThoughts } from '@/data/thoughts';
-import { MaskedWords } from '@/components/masked-words';
-import { MorphWordIn } from '@/components/morph-word-in';
-import { useActiveNav } from '@/contexts/active-nav-context';
 import { Head, Link, usePage } from '@inertiajs/react';
-
-
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import PublicBooks from '@/actions/App/Http/Controllers/BooksController';
+import ThoughtsController from '@/actions/App/Http/Controllers/ThoughtsController';
+import { ContactSection } from '@/components/contact-section';
+import { MaskedWords } from '@/components/masked-words';
+import { MorphWordIn } from '@/components/morph-word-in';
+import { ProjectDrawer } from '@/components/project-drawer';
+import { useActiveNav } from '@/contexts/active-nav-context';
+import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO  } from '@/data/projects';
+import type {Project} from '@/data/projects';
+import type { PublicBookTerminal } from '@/data/public-books';
+import { THOUGHTS_INTRO  } from '@/data/thoughts';
+import type {PublicThoughtListItem} from '@/data/thoughts';
+import { cn } from '@/lib/utils';
+import { BOOKS_INTRO } from '@/pages/books';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const SECTION_IDS = ['about', 'projects', 'contact'];
 
-function SplitChars({ children, className }: { children: string; className?: string }) {
-    return (
-        <span className={className} aria-label={children}>
-            {children.split('').map((char, i) => (
-                <span key={i} className="char inline-block overflow-hidden" aria-hidden="true">
-                    <span className="char-inner inline-block">{char === ' ' ? '\u00A0' : char}</span>
-                </span>
-            ))}
-        </span>
-    );
+/** Degrees, px lift, z-index for each of the five fan slots (left → right). */
+const HOME_BOOK_FAN_ROTATE = [-17, -8, 0, 8, 17] as const;
+const HOME_BOOK_FAN_LIFT = [18, 0, -5, 0, 18] as const;
+
+/** Horizontal nudge when the fan tray is hovered so covers open slightly. */
+function homeFanSpreadClass(i: number): string {
+    const map: Record<number, string> = {
+        0: 'group-hover/home-books-fan:-translate-x-2 md:group-hover/home-books-fan:-translate-x-3',
+        1: 'group-hover/home-books-fan:-translate-x-1 md:group-hover/home-books-fan:-translate-x-2',
+        2: '',
+        3: 'group-hover/home-books-fan:translate-x-1 md:group-hover/home-books-fan:translate-x-2',
+        4: 'group-hover/home-books-fan:translate-x-2 md:group-hover/home-books-fan:translate-x-3',
+    };
+
+    return map[i] ?? '';
+}
+
+function homeFanZClass(i: number): string {
+    return ['z-[2]', 'z-[4]', 'z-[10]', 'z-[4]', 'z-[2]'][i] ?? 'z-[1]';
+}
+
+/** Slight horizontal offset at rest so the fan sits a bit more open. */
+function homeFanRestSpreadClass(i: number): string {
+    const map: Record<number, string> = {
+        0: '-translate-x-1 md:-translate-x-1.5',
+        1: '-translate-x-0.5',
+        2: '',
+        3: 'translate-x-0.5',
+        4: 'translate-x-1 md:translate-x-1.5',
+    };
+
+    return map[i] ?? '';
 }
 
 const HERO_WORDS = ['software.', 'mobile apps.', 'tools.', 'automations.', 'AI agents.', 'for the web.'];
@@ -39,9 +67,8 @@ function MorphWord() {
     const textIndexRef = useRef(0);
     const morphRef = useRef(0);
     const cooldownRef = useRef(COOLDOWN_TIME);
-    const timeRef = useRef(performance.now());
+    const timeRef = useRef(0);
     const rafRef = useRef<number>(0);
-    const [, forceUpdate] = useState(0);
 
     function setMorph(fraction: number) {
         const text1 = text1Ref.current;
@@ -82,6 +109,7 @@ function MorphWord() {
         text1.style.filter = '';
         text2.style.opacity = '0%';
         text2.style.filter = '';
+        timeRef.current = performance.now();
 
         function animate() {
             rafRef.current = requestAnimationFrame(animate);
@@ -95,7 +123,6 @@ function MorphWord() {
             if (cooldownRef.current <= 0) {
                 if (shouldIncrementIndex) {
                     textIndexRef.current = (textIndexRef.current + 1) % HERO_WORDS.length;
-                    forceUpdate((x) => x + 1);
                 }
                 morphRef.current -= cooldownRef.current;
                 cooldownRef.current = 0;
@@ -113,10 +140,6 @@ function MorphWord() {
         return () => cancelAnimationFrame(rafRef.current);
     }, []);
 
-    const i = textIndexRef.current;
-    const n = HERO_WORDS.length;
-    const currentWord = HERO_WORDS[i % n];
-
     return (
         <>
             <svg className="absolute size-0 overflow-hidden" aria-hidden>
@@ -130,7 +153,7 @@ function MorphWord() {
                     </filter>
                 </defs>
             </svg>
-            <span className="morph-container" aria-label={currentWord}>
+            <span className="morph-container" aria-label="Rotating headline">
                 <span
                     ref={text1Ref}
                     className="morph-text"
@@ -146,7 +169,7 @@ function MorphWord() {
                     {HERO_WORDS[1]}
                 </span>
                 <span className="invisible whitespace-nowrap" aria-hidden>
-                    {currentWord}
+                    {HERO_WORDS[0]}
                 </span>
             </span>
         </>
@@ -155,8 +178,10 @@ function MorphWord() {
 
 export default function Home() {
     const { setActiveNav } = useActiveNav();
-    const { featuredProjects = [] } = usePage<{
+    const { featuredProjects = [], homeBookFanItems = [], latestThoughts = [] } = usePage<{
         featuredProjects?: Project[];
+        homeBookFanItems?: Array<PublicBookTerminal & { key: string }>;
+        latestThoughts?: PublicThoughtListItem[];
     }>().props;
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -284,7 +309,7 @@ export default function Home() {
                 };
                 const scrollMultiplier = 2.4;
 
-                const horizontalTween = gsap.to(track, {
+                gsap.to(track, {
                     x: () => -getScrollAmount(),
                     ease: 'none',
                     scrollTrigger: {
@@ -353,6 +378,37 @@ export default function Home() {
                 duration: 0.6,
                 ease: 'power2.out',
                 scrollTrigger: { trigger: '.blog-header', start: 'top 85%', once: true },
+            });
+
+            gsap.from('.home-books-section .page-title', {
+                y: 24,
+                opacity: 0,
+                duration: 0.55,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.home-books-section', start: 'top 85%', once: true },
+            });
+            gsap.from('.home-books-section .page-intro .word', {
+                yPercent: 120,
+                stagger: 0.04,
+                duration: 0.6,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.home-books-section', start: 'top 85%', once: true },
+            });
+            gsap.from('.home-book-fan-enter', {
+                y: 48,
+                opacity: 0,
+                stagger: 0.07,
+                duration: 0.55,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.home-books-section', start: 'top 85%', once: true },
+            });
+            gsap.from('.home-books-cta', {
+                y: 20,
+                opacity: 0,
+                duration: 0.5,
+                delay: 0.2,
+                ease: 'power2.out',
+                scrollTrigger: { trigger: '.home-books-section', start: 'top 85%', once: true },
             });
 
             // ── Contact: intro, newsletter, socials + word reveal ──
@@ -535,7 +591,7 @@ export default function Home() {
                                 </span>
                                 <div className="relative z-10">
                                     <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
-                                        01 — what
+                                        01 - what
                                     </span>
                                     <h3 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
                                         What I do
@@ -556,7 +612,7 @@ export default function Home() {
                                 </span>
                                 <div className="relative z-10 text-right">
                                     <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
-                                        02 — why
+                                        02 - why
                                     </span>
                                     <h3 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
                                         Why I do it
@@ -577,7 +633,7 @@ export default function Home() {
                                 </span>
                                 <div className="relative z-10">
                                     <span className="mb-3 block font-mono text-xs uppercase tracking-widest text-[#1b1b18]/30 dark:text-[#EDEDEC]/30">
-                                        03 — how
+                                        03 - how
                                     </span>
                                     <h3 className="font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
                                         How I do it
@@ -630,7 +686,7 @@ export default function Home() {
                                 </h2>
                                 {latestThoughts.length > 0 && (
                                     <Link
-                                        href="/thoughts"
+                                        href={ThoughtsController.index.url()}
                                         className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white"
                                     >
                                         All posts
@@ -639,7 +695,7 @@ export default function Home() {
                                 )}
                             </div>
                             <p className="mb-8 text-lg leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70">
-                                <MaskedWords>Sometimes I write about things I'm thinking about. Some are quick thoughts, some turn into longer posts.</MaskedWords>
+                                <MaskedWords>{THOUGHTS_INTRO}</MaskedWords>
                             </p>
 
                             {latestThoughts.length === 0 ? (
@@ -651,7 +707,7 @@ export default function Home() {
                                     {latestThoughts.map((thought) => (
                                         <Link
                                             key={thought.slug}
-                                            href={`/thoughts/${thought.slug}`}
+                                            href={ThoughtsController.show.url(thought.slug)}
                                             className="group flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
                                         >
                                             <div className="min-w-0">
@@ -675,6 +731,71 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+
+                {homeBookFanItems.length > 0 ? (
+                    <section className="home-books-section px-6 pt-16 pb-14 md:pt-24">
+                        <div className="mx-auto max-w-[700px] text-center">
+                            <h2 className="page-title font-title mb-4 text-3xl font-light leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
+                                <MorphWordIn>Books</MorphWordIn>
+                            </h2>
+                            <p className="page-intro mb-3 text-lg leading-relaxed text-[#1b1b18]/70 dark:text-[#EDEDEC]/70 sm:mb-10 md:mb-12">
+                                <MaskedWords>{BOOKS_INTRO}</MaskedWords>
+                            </p>
+                            <div className="group/home-books-fan home-books-fan relative mx-auto flex min-h-[160px] max-w-[min(100%,580px)] items-end justify-center pb-1 pt-0 sm:min-h-[300px] sm:max-w-[640px] sm:pb-3 sm:pt-2 md:min-h-[320px] md:max-w-[min(100%,720px)]">
+                                {homeBookFanItems.map((b, i) => (
+                                    <Link
+                                        key={b.key}
+                                        href={PublicBooks.show.url(b.slug)}
+                                        className={cn(
+                                            'home-book-fan-card group/card relative block w-[34%] max-w-[168px] shrink-0 origin-bottom transition-[margin] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:max-w-[196px] md:max-w-[224px]',
+                                            i > 0 &&
+                                                '-ml-[24%] group-hover/home-books-fan:-ml-[12%] sm:-ml-[22%] sm:group-hover/home-books-fan:-ml-[10%] md:-ml-[20%] md:group-hover/home-books-fan:-ml-[8%]',
+                                            homeFanRestSpreadClass(i),
+                                            homeFanSpreadClass(i),
+                                            homeFanZClass(i),
+                                        )}
+                                    >
+                                        <div className="home-book-fan-enter block will-change-transform">
+                                            <div
+                                                className="origin-bottom transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                                style={{
+                                                    transform: `rotate(${HOME_BOOK_FAN_ROTATE[i]}deg) translateY(${HOME_BOOK_FAN_LIFT[i]}px)`,
+                                                }}
+                                            >
+                                                <div
+                                                    className="overflow-hidden rounded-xl border border-white/30 bg-[#f5f5f4] shadow-lg shadow-black/[0.12] transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:border-[#1b1b18]/55 group-hover/card:shadow-md dark:border-white/10 dark:bg-[#1e1e1d] dark:shadow-black/35 dark:group-hover/card:border-[#EDEDEC]/65"
+                                                >
+                                                    {b.image ? (
+                                                        <img
+                                                            src={b.image}
+                                                            alt=""
+                                                            className="aspect-[3/4] w-full object-cover"
+                                                            onError={(e) => {
+                                                                e.currentTarget.style.display = 'none';
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="aspect-[3/4] w-full bg-muted/40" aria-hidden />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span className="sr-only">
+                                            {b.title} by {b.author}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                            <Link
+                                href="/books"
+                                className="home-books-cta mt-10 inline-flex items-center gap-2 rounded-full border border-[#1b1b18] bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:border-[#EDEDEC] dark:bg-[#EDEDEC] dark:text-[#0a0a0a] dark:hover:bg-white md:mt-12"
+                            >
+                                Browse the shelf
+                                <span aria-hidden>→</span>
+                            </Link>
+                        </div>
+                    </section>
+                ) : null}
 
                 {/* ── Contact ── */}
                 <ContactSection id="contact" title="Say hello" showNewsletter />

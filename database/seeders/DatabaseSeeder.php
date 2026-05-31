@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(NowPageSeeder::class);
         $this->call(ProjectSeeder::class);
+        $this->call(ThoughtSeeder::class);
     }
 }

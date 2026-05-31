@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, BookOpen, CalendarClock, FolderKanban } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { ArrowRight, BookOpen, CalendarClock, FolderKanban, MessageSquare } from 'lucide-react';
+import ContentThoughtController from '@/actions/App/Http/Controllers/Content/ContentThoughtController';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -9,6 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import { content, dashboard } from '@/routes';
 import { books, now, projects } from '@/routes/content';
 import type { BreadcrumbItem } from '@/types';
@@ -40,9 +41,16 @@ const ctas = [
         icon: BookOpen,
     },
     {
+        title: 'Thoughts',
+        description:
+            'Write posts with dates and tags, manage drafts, and keep the thoughts section in sync with the site.',
+        href: ContentThoughtController.index(),
+        icon: MessageSquare,
+    },
+    {
         title: 'Now',
         description:
-            'Update what you are focused on lately—priorities, experiments, and life context for visitors.',
+            'Update what you are focused on lately-priorities, experiments, and life context for visitors.',
         href: now(),
         icon: CalendarClock,
     },
@@ -62,7 +70,7 @@ export default function Content() {
                     </p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {ctas.map((item) => {
                         const Icon = item.icon;
                         return (

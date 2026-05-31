@@ -8,7 +8,10 @@ test('home page returns a successful response', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('home')
             ->has('featuredProjects')
-            ->has('publicProjects'));
+            ->has('publicProjects')
+            ->has('publicBooks')
+            ->has('homeBookFanItems')
+            ->has('latestThoughts'));
 });
 
 test('projects page returns a successful response', function () {
@@ -20,8 +23,19 @@ test('projects page returns a successful response', function () {
             ->has('publicProjects'));
 });
 
-test('now page returns a successful response', function () {
-    $response = $this->get(route('now'));
+test('books page returns a successful response', function () {
+    $this->get(route('books'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('books')
+            ->has('books')
+            ->has('publicBooks'));
+});
 
-    $response->assertOk();
+test('thoughts page returns a successful response', function () {
+    $this->get(route('thoughts'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('thoughts')
+            ->has('thoughts'));
 });

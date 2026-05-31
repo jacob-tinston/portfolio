@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Book;
 use App\Models\Project;
+use App\Models\Thought;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -49,6 +51,25 @@ class HandleInertiaRequests extends Middleware
                 ->orderedForPublic()
                 ->get()
                 ->map(fn (Project $project) => $project->toPublicProps())
+                ->values()
+                ->all(),
+            'publicBooks' => Book::query()
+                ->visible()
+                ->orderedForPublic()
+                ->get()
+                ->map(fn (Book $book) => $book->toPublicTerminalProps())
+                ->values()
+                ->all(),
+            'latestThoughts' => Thought::query()
+                ->published()
+                ->orderedForPublic()
+                ->limit(3)
+                ->get()
+                ->map(fn (Thought $thought) => [
+                    'slug' => $thought->slug,
+                    'title' => $thought->title,
+                    'date' => $thought->thought_date->format('F j, Y'),
+                ])
                 ->values()
                 ->all(),
         ];

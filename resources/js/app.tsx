@@ -9,11 +9,12 @@ import { initializeTheme } from '@/hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Jacob Tinston | Software & AI Engineer';
 
-const SITE_PAGES = ['home', 'projects', 'now', 'contact', 'thoughts', 'thoughts/show', 'auth/login', 'auth/confirm-password', 'auth/verify-email'];
+const SITE_PAGES = ['home', 'projects', 'books', 'books/show', 'now', 'contact', 'thoughts', 'thoughts/show', 'auth/login', 'auth/confirm-password', 'auth/verify-email'];
 
 const pageModules = {
     ...import.meta.glob('./pages/*.tsx'),
     ...import.meta.glob('./pages/auth/**/*.tsx'),
+    ...import.meta.glob('./pages/books/**/*.tsx'),
     ...import.meta.glob('./pages/content/**/*.tsx'),
     ...import.meta.glob('./pages/thoughts/**/*.tsx'),
     ...import.meta.glob('./pages/settings/**/*.tsx'),
@@ -80,9 +81,9 @@ console.log(`%c  ╔════════════════════
   ║                                                ║
   ║ 👋 Hey, curious one. This site was built with: ║
   ║                                                ║
-  ║ ⚙️ Laravel    — The engine under the hood      ║
-  ║ 🔗 Inertia.js — Seamless SPA, no API needed    ║
-  ║ 🎞️ GSAP       — Making things move beautifully ║
+  ║ ⚙️ Laravel    - The engine under the hood      ║
+  ║ 🔗 Inertia.js - Seamless SPA, no API needed    ║
+  ║ 🎞️ GSAP       - Making things move beautifully ║
   ║                                                ║
   ║ Built with ❤️ by Jacob.                        ║
   ║                                                ║

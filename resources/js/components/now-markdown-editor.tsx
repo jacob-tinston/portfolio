@@ -9,6 +9,8 @@ export type NowMarkdownEditorProps = {
     onChange: (markdown: string) => void;
     placeholder?: string;
     className?: string;
+    /** Editor height in pixels (default 280). */
+    height?: number;
 };
 
 function useDocumentColorMode(): 'light' | 'dark' {
@@ -40,6 +42,7 @@ export function NowMarkdownEditor({
     onChange,
     placeholder = 'Write something…',
     className,
+    height = 280,
 }: NowMarkdownEditorProps) {
     const [mounted, setMounted] = useState(false);
     const colorMode = useDocumentColorMode();
@@ -67,7 +70,7 @@ export function NowMarkdownEditor({
                 onChange={(v) => onChange(v ?? '')}
                 preview="live"
                 visibleDragbar
-                height={280}
+                height={height}
                 minHeight={200}
                 data-color-mode={colorMode}
                 textareaProps={{

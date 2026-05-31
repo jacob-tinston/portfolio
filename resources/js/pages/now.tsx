@@ -1,17 +1,16 @@
-import { MaskedWords } from '@/components/masked-words';
-import { MorphWordIn } from '@/components/morph-word-in';
 import { Head } from '@inertiajs/react';
 import gsap from 'gsap';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+
+import { MaskedWords } from '@/components/masked-words';
+import { MorphWordIn } from '@/components/morph-word-in';
+import { MARKDOWN_BODY_CLASS } from '@/lib/markdown-body-class';
 
 type NowProps = {
     buildingHtml: string;
     learningHtml: string;
     readingHtml: string;
 };
-
-const markdownBodyClass =
-    'text-base leading-relaxed text-[#1b1b18] dark:text-[#EDEDEC] md:text-lg [&_a]:underline [&_a]:decoration-[#1b1b18]/30 [&_a]:underline-offset-2 [&_a]:transition-colors hover:[&_a]:decoration-[#1b1b18]/60 dark:[&_a]:decoration-[#EDEDEC]/30 dark:hover:[&_a]:decoration-[#EDEDEC]/60 [&_p]:mb-4 [&_p:last-child]:mb-0 [&_strong]:font-medium';
 
 export default function Now({ buildingHtml, learningHtml, readingHtml }: NowProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -101,8 +100,7 @@ export default function Now({ buildingHtml, learningHtml, readingHtml }: NowProp
                                         {item.title}
                                     </dt>
                                     <dd
-                                        className={markdownBodyClass}
-                                        // eslint-disable-next-line react/no-danger -- server-sanitised Markdown via CommonMark (html_input: strip)
+                                        className={MARKDOWN_BODY_CLASS}
                                         dangerouslySetInnerHTML={{ __html: item.html }}
                                     />
                                 </div>

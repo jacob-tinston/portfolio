@@ -1,9 +1,10 @@
 'use client';
 
-import type { Project } from '@/data/projects';
-import { useAppearance } from '@/hooks/use-appearance';
 import { usePage } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Project } from '@/data/projects';
+import type { PublicBookTerminal } from '@/data/public-books';
+import { useAppearance } from '@/hooks/use-appearance';
 
 type LineType = 'command' | 'output' | 'error' | 'success' | 'blank';
 
@@ -25,6 +26,7 @@ const HELP_TEXT = `Available commands:
   whoami -      who is Jacob
   about -       about & skills
   projects -    list projects
+  books -       list books
   now -         what I'm up to now
   contact -     contact details
   ls -          list site pages
@@ -42,8 +44,8 @@ After 6 months in college, I decided that I wanted to build things rather than r
 I learn by building. That's how I taught myself to code and it's still how I pick up anything new. I move fast, ship early, and improve based on what I see rather than what I assumed.
 
 Stack I use:
-  — Laravel
-  — React
+  - Laravel
+  - React
   - TypeScript
   - Flutter
   - Swift
@@ -70,6 +72,7 @@ LinkedIn   → linkedin.com/in/jacob-tinston`;
 
 const LS_TEXT = `/
 /projects
+/books
 /now
 /contact`;
 
@@ -83,10 +86,13 @@ export function TerminalOverlay({
     const [lines, setLines] = useState<Line[]>(INITIAL_LINES);
     const [input, setInput] = useState('');
     const [history, setHistory] = useState<string[]>([]);
-    const [historyIndex, setHistoryIndex] = useState(-1);
+    const [, setHistoryIndex] = useState(-1);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const { resolvedAppearance, updateAppearance } = useAppearance();
-    const { publicProjects = [] } = usePage<{ publicProjects?: Project[] }>().props;
+    const { publicProjects = [], publicBooks = [] } = usePage<{
+        publicProjects?: Project[];
+        publicBooks?: PublicBookTerminal[];
+    }>().props;
     const inputRef = useRef<HTMLInputElement>(null);
     const outputRef = useRef<HTMLDivElement>(null);
 
@@ -182,6 +188,31 @@ export function TerminalOverlay({
                         }
                     });
                     break;
+                case 'books':
+                    addLines({ type: 'output', text: 'Books:' });
+                    addLines({ type: 'blank', text: '' });
+                    if (publicBooks.length === 0) {
+                        addLines({ type: 'output', text: '  No books listed yet.' });
+                        break;
+                    }
+                    publicBooks.forEach((b, i) => {
+                        const finished =
+                            b.date_finished != null && b.date_finished !== '';
+                        addLines({ type: 'output', text: `  ${i + 1}. ${b.title} — ${b.author}` });
+                        const detailLine = finished
+                            ? `     Rating ${b.rating}/10 · Finished ${b.date_finished}`
+                            : b.rating > 0
+                              ? `     Rating ${b.rating}/10`
+                              : '     Currently reading';
+                        addLines({
+                            type: 'output',
+                            text: detailLine,
+                        });
+                        if (i < publicBooks.length - 1) {
+                            addLines({ type: 'blank', text: '' });
+                        }
+                    });
+                    break;
                 case 'now':
                     NOW_TEXT.split('\n').forEach((line) =>
                         addLines({ type: 'output', text: line }),
@@ -220,7 +251,7 @@ export function TerminalOverlay({
 
             addLines({ type: 'blank', text: '' });
         },
-        [addLines, onClose, publicProjects, resolvedAppearance, updateAppearance],
+        [addLines, onClose, publicBooks, publicProjects, resolvedAppearance, updateAppearance],
     );
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -270,21 +301,21 @@ export function TerminalOverlay({
                 {/* Title bar */}
                 <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.08] px-4 py-3">
                     <div className="flex gap-1.5">
-                        {/* Red — close */}
+                        {/* Red - close */}
                         <button
                             type="button"
                             onClick={onClose}
                             aria-label="Close terminal"
                             className="size-3 rounded-full bg-[#ff5f57] transition-opacity hover:opacity-80"
                         />
-                        {/* Yellow — restore to normal */}
+                        {/* Yellow - restore to normal */}
                         <button
                             type="button"
                             onClick={() => setIsFullscreen(false)}
                             aria-label="Restore terminal"
                             className="size-3 rounded-full bg-[#febc2e] transition-opacity hover:opacity-80"
                         />
-                        {/* Green — fullscreen */}
+                        {/* Green - fullscreen */}
                         <button
                             type="button"
                             onClick={() => setIsFullscreen(true)}
@@ -293,11 +324,11 @@ export function TerminalOverlay({
                         />
                     </div>
                     <span className="flex-1 text-center font-mono text-xs text-[#EDEDEC]/30">
-                        jacob@tinston.dev — terminal
+                        jacob@tinston.dev - terminal
                     </span>
                 </div>
 
-                {/* Output — scrollable */}
+                {/* Output - scrollable */}
                 <div
                     ref={outputRef}
                     className="flex-1 overflow-y-auto px-4 py-3 font-mono text-xs leading-relaxed sm:px-5 sm:py-4 sm:text-sm"

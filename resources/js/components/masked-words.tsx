@@ -22,7 +22,7 @@ export function MaskedWords({
     linkClassName?: string;
 }) {
     const words = children.split(' ');
-    const normalize = (w: string) => w.replace(/[.,—:;]/g, '').toLowerCase();
+    const normalize = (w: string) => w.replace(/[.,-:;]/g, '').toLowerCase();
     const isBold = (w: string) =>
         boldWords.some((b) => normalize(w) === normalize(b));
     const isItalic = (w: string) =>
