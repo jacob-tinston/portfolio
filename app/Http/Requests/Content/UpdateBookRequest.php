@@ -34,6 +34,10 @@ class UpdateBookRequest extends FormRequest
             $merge['notes'] = null;
         }
 
+        if ($this->input('current_page') === '') {
+            $merge['current_page'] = null;
+        }
+
         $this->merge($merge);
     }
 
@@ -47,6 +51,7 @@ class UpdateBookRequest extends FormRequest
             'author' => ['required', 'string', 'max:255'],
             'image' => ['nullable', 'file', 'image', 'max:5120'],
             'rating' => ['required', 'integer', 'min:0', 'max:10'],
+            'current_page' => ['nullable', 'integer', 'min:0'],
             'isbn' => ['nullable', 'string', 'max:32'],
             'date_finished' => ['nullable', 'date'],
             'summary' => ['nullable', 'string', 'max:20000'],

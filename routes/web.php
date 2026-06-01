@@ -27,8 +27,10 @@ Route::get('/robots.txt', fn () => response(
 )->header('Content-Type', 'text/plain'));
 Route::post('/newsletter', App\Http\Controllers\NewsletterSubscribeController::class)->name('newsletter.subscribe');
 
+Route::redirect('/admin', '/dashboard');
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::redirect('dashboard', '/content')->name('dashboard');
     Route::inertia('content', 'content')->name('content');
     Route::get('content/projects', [ContentProjectController::class, 'index'])->name('content.projects');
     Route::get('content/projects/create', [ContentProjectController::class, 'create'])->name('content.projects.create');

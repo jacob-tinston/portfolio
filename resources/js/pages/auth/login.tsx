@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -22,6 +22,9 @@ export default function Login({
     void canResetPassword;
     void canRegister;
 
+    const errors = (usePage().props.errors ?? {}) as Record<string, string>;
+    const allErrors = Object.values(errors);
+
     return (
         <AuthLayout
             title="Sign in"
@@ -34,7 +37,7 @@ export default function Login({
                 resetOnSuccess={['password']}
                 className="flex flex-col gap-6"
             >
-                {({ processing, errors }) => (
+                {({ processing }) => (
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
@@ -49,7 +52,6 @@ export default function Login({
                                     autoComplete="email"
                                     placeholder="email@example.com"
                                 />
-                                <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
@@ -63,7 +65,6 @@ export default function Login({
                                     autoComplete="current-password"
                                     placeholder="Password"
                                 />
-                                <InputError message={errors.password} />
                             </div>
 
                             <div className="flex items-center space-x-3">
@@ -75,9 +76,17 @@ export default function Login({
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>
 
+                            {allErrors.length > 0 && (
+                                <div className="grid gap-1">
+                                    {allErrors.map((message) => (
+                                        <InputError key={message} message={message} />
+                                    ))}
+                                </div>
+                            )}
+
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="w-full"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"

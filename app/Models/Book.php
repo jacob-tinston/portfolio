@@ -22,6 +22,7 @@ class Book extends Model
         'author',
         'image_path',
         'rating',
+        'current_page',
         'isbn',
         'date_finished',
         'summary',
@@ -40,6 +41,7 @@ class Book extends Model
             'is_published' => 'boolean',
             'date_finished' => 'date',
             'rating' => 'integer',
+            'current_page' => 'integer',
             'sort_order' => 'integer',
         ];
     }

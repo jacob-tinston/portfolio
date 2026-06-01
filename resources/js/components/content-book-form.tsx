@@ -23,6 +23,7 @@ export type ContentBookEditPayload = {
     title: string;
     author: string;
     rating: number;
+    current_page: number | null;
     isbn: string;
     date_finished: string;
     summary: string;
@@ -48,6 +49,7 @@ function ContentBookFormInner({ mode, book, status, heading }: ContentBookFormPr
         title: book?.title ?? '',
         author: book?.author ?? '',
         rating: book?.rating ?? 0,
+        current_page: book?.current_page ?? null,
         isbn: book?.isbn ?? '',
         date_finished: book?.date_finished ?? '',
         summary: book?.summary ?? '',
@@ -223,7 +225,7 @@ function ContentBookFormInner({ mode, book, status, heading }: ContentBookFormPr
                                             <InputError message={form.errors.isbn} />
                                         </div>
                                     </div>
-                                    <div className="grid min-w-0 gap-4 sm:max-w-xl sm:grid-cols-2">
+                                    <div className="grid min-w-0 gap-4 sm:max-w-xl sm:grid-cols-3">
                                         <div className="grid min-w-0 gap-2">
                                             <Label htmlFor={`${baseId}-rating`}>Rating (0–10)</Label>
                                             <Input
@@ -261,6 +263,22 @@ function ContentBookFormInner({ mode, book, status, heading }: ContentBookFormPr
                                                 onChange={(e) => form.setData('date_finished', e.target.value)}
                                             />
                                             <InputError message={form.errors.date_finished} />
+                                        </div>
+                                        <div className="grid min-w-0 gap-2">
+                                            <Label htmlFor={`${baseId}-current-page`}>Current page</Label>
+                                            <Input
+                                                id={`${baseId}-current-page`}
+                                                type="number"
+                                                min={0}
+                                                step={1}
+                                                value={form.data.current_page ?? ''}
+                                                onChange={(e) => {
+                                                    const raw = e.target.value;
+                                                    form.setData('current_page', raw === '' ? null : Math.max(0, parseInt(raw, 10) || 0));
+                                                }}
+                                                placeholder="—"
+                                            />
+                                            <InputError message={form.errors.current_page} />
                                         </div>
                                     </div>
                                 </div>

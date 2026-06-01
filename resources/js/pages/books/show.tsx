@@ -80,7 +80,7 @@ export default function BookShow() {
 
                     {book.is_hidden ? (
                         <p className="book-show-block mb-6 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100">
-                            This book is hidden from the public list but still viewable by link.
+                            This book is hidden from the public.
                         </p>
                     ) : null}
 
