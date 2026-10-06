@@ -6,9 +6,11 @@ use App\Http\Controllers\Content\ContentProjectController;
 use App\Http\Controllers\Content\ContentThoughtController;
 use App\Http\Controllers\Content\NowPageController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NewsletterSubscribeController;
 use App\Http\Controllers\NowController;
+// use App\Http\Controllers\ThoughtsController;
 use App\Http\Controllers\ProjectsController;
-use App\Http\Controllers\ThoughtsController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -17,15 +19,15 @@ Route::get('/books', [BooksController::class, 'index'])->name('books');
 Route::get('/books/{book}', [BooksController::class, 'show'])->name('books.show');
 Route::get('/now', NowController::class)->name('now');
 Route::inertia('/contact', 'contact')->name('contact');
-Route::get('/thoughts', [ThoughtsController::class, 'index'])->name('thoughts');
-Route::get('/thoughts/{thought}', [ThoughtsController::class, 'show'])->name('thoughts.show');
+// Route::get('/thoughts', [ThoughtsController::class, 'index'])->name('thoughts');
+// Route::get('/thoughts/{thought}', [ThoughtsController::class, 'show'])->name('thoughts.show');
 
-Route::get('/sitemap.xml', App\Http\Controllers\SitemapController::class)->name('sitemap');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', fn () => response(
     "User-agent: *\nDisallow:\n\nSitemap: ".route('sitemap'),
     200,
 )->header('Content-Type', 'text/plain'));
-Route::post('/newsletter', App\Http\Controllers\NewsletterSubscribeController::class)->name('newsletter.subscribe');
+Route::post('/newsletter', NewsletterSubscribeController::class)->name('newsletter.subscribe');
 
 Route::redirect('/admin', '/dashboard');
 

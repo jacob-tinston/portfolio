@@ -1,3 +1,4 @@
+/*
 import { Head, Link, usePage } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -97,3 +98,4 @@ export default function Thoughts() {
         </>
     );
 }
+*/

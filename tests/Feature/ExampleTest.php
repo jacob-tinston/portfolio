@@ -32,10 +32,10 @@ test('books page returns a successful response', function () {
             ->has('publicBooks'));
 });
 
-test('thoughts page returns a successful response', function () {
-    $this->get(route('thoughts'))
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('thoughts')
-            ->has('thoughts'));
-});
+// test('thoughts page returns a successful response', function () {
+//     $this->get(route('thoughts'))
+//         ->assertOk()
+//         ->assertInertia(fn (Assert $page) => $page
+//             ->component('thoughts')
+//             ->has('thoughts'));
+// });

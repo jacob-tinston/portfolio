@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import PublicBooks from '@/actions/App/Http/Controllers/BooksController';
-import ThoughtsController from '@/actions/App/Http/Controllers/ThoughtsController';
+// import ThoughtsController from '@/actions/App/Http/Controllers/ThoughtsController';
 import { ContactSection } from '@/components/contact-section';
 import { MaskedWords } from '@/components/masked-words';
 import { MorphWordIn } from '@/components/morph-word-in';
@@ -13,8 +13,8 @@ import { useActiveNav } from '@/contexts/active-nav-context';
 import { PROJECTS_ARCHIVE_INTRO, PROJECTS_INTRO  } from '@/data/projects';
 import type {Project} from '@/data/projects';
 import type { PublicBookTerminal } from '@/data/public-books';
-import { THOUGHTS_INTRO  } from '@/data/thoughts';
-import type {PublicThoughtListItem} from '@/data/thoughts';
+// import { THOUGHTS_INTRO  } from '@/data/thoughts';
+// import type {PublicThoughtListItem} from '@/data/thoughts';
 import { cn } from '@/lib/utils';
 import { BOOKS_INTRO } from '@/pages/books';
 
@@ -178,10 +178,10 @@ function MorphWord() {
 
 export default function Home() {
     const { setActiveNav } = useActiveNav();
-    const { featuredProjects = [], homeBookFanItems = [], latestThoughts = [] } = usePage<{
+    const { featuredProjects = [], homeBookFanItems = [] } = usePage<{
         featuredProjects?: Project[];
         homeBookFanItems?: Array<PublicBookTerminal & { key: string }>;
-        latestThoughts?: PublicThoughtListItem[];
+        // latestThoughts?: PublicThoughtListItem[];
     }>().props;
     const containerRef = useRef<HTMLDivElement>(null);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -676,7 +676,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* ── Blog ── */}
+                {/* ── Blog (hidden for now) ──
                 <section id="thoughts" className="px-6 py-14">
                     <div className="mx-auto max-w-[700px]">
                         <div className="blog-header relative z-10 overflow-hidden rounded-2xl border border-white/30 bg-white/60 p-8 shadow-lg shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-black/20 md:p-10">
@@ -731,6 +731,7 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+                */}
 
                 {homeBookFanItems.length > 0 ? (
                     <section className="home-books-section px-6 pt-16 pb-14 md:pt-24">
